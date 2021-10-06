@@ -30,7 +30,6 @@ public class HttpResponse {
                     readResource(path);
                 } else {
                     createHeader(StatusCode._404, "text/html");
-                    readResource("./files/html/404.html");
                 }
                 break;
             case POST:
@@ -43,6 +42,11 @@ public class HttpResponse {
                 }
                 break;
             case HEAD:
+                if (resourceFile.exists()) {
+                    createHeader(StatusCode._200, "application/json");
+                } else {
+                    createHeader(StatusCode._404, "text/html");
+                }
                 break;
             case PUT:
                 break;
