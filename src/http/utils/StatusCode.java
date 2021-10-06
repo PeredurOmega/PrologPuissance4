@@ -86,4 +86,9 @@ public enum StatusCode {
     StatusCode(String statusCode) {
         this.statusCode = statusCode;
     }
+
+    @Override
+    public String toString() {
+        return statusCode;
+    }
 }

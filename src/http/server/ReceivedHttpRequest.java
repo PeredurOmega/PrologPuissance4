@@ -9,12 +9,28 @@ import java.util.List;
 public class ReceivedHttpRequest {
     HashMap<String, String> headerInfo = new HashMap();
 
-    Method method;
-    String uri;
-    String version;
+    private Method method;
+    private String uri;
+    private String version;
 
     ReceivedHttpRequest(String r) {
 
+    }
+
+    public HashMap<String, String> getHeaderInfo() {
+        return headerInfo;
+    }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public String getVersion() {
+        return version;
     }
 
     public void parseRequest(String s){
