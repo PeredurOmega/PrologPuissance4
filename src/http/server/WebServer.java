@@ -103,31 +103,8 @@ public class WebServer {
                 System.out.println("Connection, sending data.");
                 printClientSocketInfo(remote);
 
-                BufferedReader in = new BufferedReader(
-                        new InputStreamReader(remote.getInputStream()));
-
-                PrintWriter out = new PrintWriter(remote.getOutputStream());
-
-                // read the data sent. We basically ignore it,
-                // stop reading once a blank line is hit. This
-                // blank line signals the end of the client HTTP
-                // headers.
-                String str = ".";
-                while (!str.equals(""))
-                    str = in.readLine();
-
-                // Send the response
-                // Send the headers
-                out.println("HTTP/1.0 200 OK");
-                out.println("Content-Type: text/html");
-                out.println("Server: Bot");
-                // this blank line signals the end of the headers
-                out.println("");
-                // Send the HTML page
-                out.println("<H1>Welcome to the Ultra Mini-WebServer</H2>");
-                out.flush();
-
-                remote.close();
+                ThreadConnection t = new ThreadConnection(remote);
+                t.start();
             } catch (Exception e) {
                 System.out.println("Error: " + e);
             }
