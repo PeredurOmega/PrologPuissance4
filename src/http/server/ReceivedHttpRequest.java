@@ -14,7 +14,7 @@ public class ReceivedHttpRequest {
     private String version;
 
     ReceivedHttpRequest(String r) {
-
+        parseRequest(r);
     }
 
     public HashMap<String, String> getHeaderInfo() {
@@ -36,6 +36,7 @@ public class ReceivedHttpRequest {
     public void parseRequest(String s){
         String [] parsedElements = s.split("&&&");
         String [] mainElement = parsedElements[0].split(" ");
+        System.out.println(mainElement[1]);
         method = Method.getMethod(mainElement[0]);
         uri = mainElement[1];
         version = mainElement[2];
