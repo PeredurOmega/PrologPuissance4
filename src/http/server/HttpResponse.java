@@ -23,20 +23,26 @@ public class HttpResponse {
     }
 
     public void buildResponse() {
+        String path = "./" + request.getUri();
+        File resourceFile = new File(path);
         switch (request.getMethod()){
             case GET:
-                String path = "./" + request.getUri();
-                File resourceFile = new File(path);
                 if (resourceFile.exists()) {
-                    createHeader(StatusCode._200);
+                    createHeader(StatusCode._200, "html");
                     readResource(path);
                 } else {
-                    createHeader(StatusCode._404);
+                    createHeader(StatusCode._404, "html");
                     readResource("./files/html/404.html");
                 }
                 break;
             case POST:
-
+                if (resourceFile.exists()) {
+                    createHeader(StatusCode._200, "json");
+                    readResource(path);
+                } else {
+                    createHeader(StatusCode._404, "html");
+                    readResource("./files/html/404.html");
+                }
                 break;
             case HEAD:
                 break;
@@ -58,9 +64,9 @@ public class HttpResponse {
         }
     }
 
-    public void createHeader(StatusCode s){
+    public void createHeader(StatusCode s, String type){
         response += "HTTP/1.1 "+ s.toString()+"\n";
-        response += "Content-Type: text/html\n";
+        response += "Content-Type: text/"+type+"\n";
         response += "\n";
     }
 }

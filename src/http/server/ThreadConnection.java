@@ -26,39 +26,44 @@ public class ThreadConnection extends Thread{
 
     public void run(){
         StringBuilder request = new StringBuilder();
+        ReceivedHttpRequest parsedRequest = new ReceivedHttpRequest();
+        int count = 0;
+        try {
+            System.out.println(in.ready());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         try{
-            String str = ".";
+            String str =".";
             while (!str.equals("")) {
                 try {
                     str = in.readLine();
-                    request.append(str);
-                    request.append("&&&");
                     System.out.println(str);
+                    if (str.equals("")){
+                        if (parsedRequest.getMethod() == Method.POST){
+                            int contentLen = Integer.parseInt(parsedRequest.getHeaderInfo().get("Content-Length"));
+                            char[] parameters = new char[contentLen];
+                            in.read(parameters,0,contentLen);
+                            System.out.println(parameters);
+                        }
+                    } else {
+                        if (count == 0) parsedRequest.parseFirstLine(str);
+                        else {
+                            parsedRequest.addHeader(str);
+                        }
+                        count++;
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            in.readLine();
-            String parameters = in.readLine();
-            System.out.println(parameters);
-//            for (int i = 0; i < 2; i++) {
-//                try {
-//                    str = in.readLine();
-//                    request.append(str);
-//                    request.append("&&&");
-//                    System.out.println(str);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
 
+            HttpResponse response = new HttpResponse(parsedRequest);
+            out.println(response.getResponse());
+            out.flush();
         } catch (Exception e) {
             System.out.println("Null mais en vrai ça passe");
         }
-        ReceivedHttpRequest parsedRequest = new ReceivedHttpRequest(request.toString());
-        HttpResponse response = new HttpResponse(parsedRequest);
-        out.println(response.getResponse());
-        out.flush();
 
 //        out.println("HTTP/1.0 200 OK\nContent-Type: text/html\nServer: Bot\n\n<H1>Welcome to the Ultra Mini-WebServer</H2>");
 //        out.println("Content-Type: text/html");
