@@ -21,6 +21,10 @@ public class ReceivedHttpRequest {
     ReceivedHttpRequest() {
     }
 
+    public HashMap<String, String> getParameters() {
+        return parameters;
+    }
+
     public HashMap<String, String> getHeaderInfo() {
         return headerInfo;
     }

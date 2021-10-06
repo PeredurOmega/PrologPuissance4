@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.sql.SQLOutput;
+import java.util.Arrays;
 
 public class ThreadConnection extends Thread{
     private Socket clientSocket;
@@ -45,6 +46,7 @@ public class ThreadConnection extends Thread{
                             char[] parameters = new char[contentLen];
                             in.read(parameters,0,contentLen);
                             System.out.println(parameters);
+                            parsedRequest.addParameters(new String(parameters));
                         }
                     } else {
                         if (count == 0) parsedRequest.parseFirstLine(str);
