@@ -10,7 +10,7 @@
 :- use_module(util).
 :- use_module(jeu).
 :- use_module(ia).
-:- use_module(miniMax).
+:- use_module(minimaxdraw).
 
 :- use_module(library(random)).
 

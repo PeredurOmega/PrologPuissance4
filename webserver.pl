@@ -168,7 +168,8 @@ obtenirCoup(_,2,Coup) :-
 
 obtenirCoup(CouleurJCourant,3,Coup) :-
     % iaMinimax(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsPuissance3,PoidsDensite,PoidsAdjacence)
-    iaMinimax(CouleurJCourant,Coup,3,1,0,0,0).
+    iaMinimax(CouleurJCourant,Coup,3,1,0,0,0),
+    writeln(Coup).
 obtenirCoup(CouleurJCourant,4,Coup) :-
     iaMinimax(CouleurJCourant,Coup,3,1,0,0,0).
 obtenirCoup(CouleurJCourant,5,Coup) :-
