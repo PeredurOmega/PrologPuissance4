@@ -9,7 +9,10 @@
 	coupValide/1,
 	typeJoueur/2,
 	changerJoueur/0,
-	insererJeton/3
+	insererJeton/3,
+	% findPossibleMoves/3,
+	findPossibleMoves2/1,
+	calculPositionJeton/3
 ]).
 
 %%%%%%%%%%%%%%%%
@@ -244,3 +247,49 @@ calculPositionJeton(X,YCheck,YCheck) :-
 calculPositionJeton(X,YCheck,Y) :-
 	incr(YCheck, YCheck1),
 	calculPositionJeton(X,YCheck1,Y).
+
+% findPossibleMoves/3(-colonneMax, -colonneCheck, +listePossibleMoves)
+% findPossibleMoves(XCheck,XCheck,Moves).
+
+% findPossibleMoves(XCheck,X,Moves) :-
+% 	incr(XCheck, XCheck1),
+% 	coupValide(XCheck),
+% 	append([XCheck],Moves,MovesA),
+% 	findPossibleMoves(XCheck1,X,MovesA).
+
+% findPossibleMoves(XCheck,X,MovesA) :-
+% 	incr(XCheck, XCheck1),
+% 	findPossibleMoves(XCheck1,X,MovesA).
+
+inRange(A,A,[A]).
+
+inRange(A,B,[A|T]) :-
+    A < B,
+    A1 is A+1,
+    inRange(A1,B,T).
+
+coupsValides([],[]).
+
+coupsValides([H|T1],[H|T]) :-
+	coupValide(H),coupsValides(T1, T).
+
+coupsValides([H1|T1],[H|T]) :-
+	not(coupValide(H1)),coupsValides(T1, T).
+
+
+findPossibleMoves2(Moves) :-
+	inRange(1,7,L),coupsValides(L,Moves).
+
+findPossibleMoves(XCheck,XCheck,_) :-
+	!.
+
+findPossibleMoves(XCheck,X,Moves) :-
+	incr(XCheck, XCheck1),
+	coupValide(XCheck),
+	append([XCheck],Moves,MovesA),
+	!,
+	findPossibleMoves(XCheck1,X,MovesA).
+
+findPossibleMoves(XCheck,X,MovesA) :-
+	incr(XCheck, XCheck1),
+	findPossibleMoves(XCheck1,X,MovesA).

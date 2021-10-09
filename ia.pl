@@ -17,7 +17,7 @@
 
 :- use_module(jeu).
 :- use_module(util).
-:- use_module(miniMax).
+:- use_module(minimaxdraw).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Prédicats dynamiques %%
@@ -40,9 +40,12 @@ iaAleatoire(Coup) :-
 iaAleatoire(Coup) :-
 	iaAleatoire(Coup).
 
+get_best((Move, Value), Move).
+
 iaMinimax(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsPuissance3,PoidsDensite,PoidsAdjacence) :-
 	assert(poidsPosition(PoidsPosition)),
 	assert(poidsPuissance3(PoidsPuissance3)),
 	assert(poidsDensite(PoidsDensite)),
 	assert(poidsAdjacence(PoidsAdjacence)),
-	parcoursArbre(JoueurCourant,Profondeur,Coup,_).
+	minimax(Profondeur,JoueurCourant,-1,Coup,Value).
+	%parcoursArbre(JoueurCourant,Profondeur,Coup,_).
