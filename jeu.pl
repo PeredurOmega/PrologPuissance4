@@ -280,3 +280,16 @@ coupsValides([H1|T1],[H|T]) :-
 findPossibleMoves2(Moves) :-
 	inRange(1,7,L),coupsValides(L,Moves).
 
+findPossibleMoves(XCheck,XCheck,_) :-
+	!.
+
+findPossibleMoves(XCheck,X,Moves) :-
+	incr(XCheck, XCheck1),
+	coupValide(XCheck),
+	append([XCheck],Moves,MovesA),
+	!,
+	findPossibleMoves(XCheck1,X,MovesA).
+
+findPossibleMoves(XCheck,X,MovesA) :-
+	incr(XCheck, XCheck1),
+	findPossibleMoves(XCheck1,X,MovesA).

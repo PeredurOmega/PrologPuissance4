@@ -4,6 +4,7 @@
 
 :- use_module(eval).
 :- use_module(jeu).
+:- use_module(util).
 
 :- dynamic caseTest/3.
 
@@ -17,13 +18,15 @@ evaluate_and_choose([Move|Moves], InitPlayer, Depth, MaxMin, Record, Best) :-
 
 evaluate_and_choose([], InitPlayer, Depth, MaxMin, Record, Record).
 
-minimax(0, InitPlayer, MaxMin, Move, Value) :-
+minimax(Depth, InitPlayer, MaxMin, Move, Value) :-
+	Depth =:= 0,
 	value(InitPlayer, V),
 	Value is V*MaxMin.
 
 minimax(Depth, InitPlayer, MaxMin, Move, Value) :-
 	Depth > 0,
-	findPossibleMoves2(Moves),
+	findall(X, (between(1,7,X),coupValide(X)), Moves),
+	%findPossibleMoves(1, 8, Moves),
 	%NextDepth:=Depth-1,
 	%MinMax := -MaxMin,
 	NewDepth is Depth-1,
@@ -59,8 +62,13 @@ move(Move, MinMax, InitPlayer) :-
 	calculPositionJeton(Move, 1, X),
 	assert(caseTest(Move, X, jaune)).
 
+calculPositionJetonTest(X,YCheck,YCheck) :- 
+	caseVideTest(X,YCheck), !.
+calculPositionJetonTest(X,YCheck,Y) :- 
+	incr(YCheck, YCheck1), calculPositionJeton(X,YCheck1,Y).
+
 undo_move(Move, Color) :-
-	calculPositionJeton(Move, 1, X),
+	calculPositionJetonTest(Move, 1, X),
 	retract(caseTest(Move, X - 1, Color)).
 
 value(InitPlayer, V) :-

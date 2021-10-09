@@ -1,7 +1,7 @@
 ﻿%%%%%%%%%%%% eval.pl %%%%%%%%%%%%
 % Différentes fonctions d'évaluation pour le Puissance 4, toutes basées sur des heuristiques différentes.
 
-:- module(eval, [evalJeu/5, evalTest1/2, evalPosition/3]).
+:- module(eval, [evalJeu/5, evalTest1/2, evalPosition/3, caseVideTest/2]).
 
 %%%%%%%%%%%%%%%%
 %% Inclusions %%
