@@ -19,14 +19,15 @@ evaluate_and_choose([], InitPlayer, Depth, MaxMin, Record, Record).
 
 minimax(0, InitPlayer, MaxMin, Move, Value) :-
 	value(InitPlayer, V),
-	Value:=V*MaxMin.
+	Value is V*MaxMin.
 
 minimax(Depth, InitPlayer, MaxMin, Move, Value) :-
 	Depth > 0,
-	findPossibleMoves(1, 8, Moves),
+	findPossibleMoves2(Moves),
 	%NextDepth:=Depth-1,
 	%MinMax := -MaxMin,
-	evaluate_and_choose(Moves, InitPlayer, Depth-1, -MaxMin, (nil, -1000), (Move, Value)).
+	NewDepth is Depth-1,
+	evaluate_and_choose(Moves, InitPlayer, NewDepth, -MaxMin, (nil, -1000), (Move, Value)).
 
 update(Move, Value, (Move1, Value1), (Move1, Value1)) :-
 	Value =< Value1.
