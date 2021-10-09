@@ -1,7 +1,7 @@
 ﻿%%%%%%%%%%%% miniMax.pl %%%%%%%%%%%%
 % Implémentation de minimax avec diverses optimisations propres au Puissance 4.
 
-:- module(miniMax, [parcoursArbre/4, caseTest/3, gagneTest/4]).
+:- module(miniMax, [	/4, caseTest/3, gagneTest/4]).
 
 %%%%%%%%%%%%%%%%
 %% Inclusions %%

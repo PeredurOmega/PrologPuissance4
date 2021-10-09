@@ -247,16 +247,16 @@ calculPositionJeton(X,YCheck,Y) :-
 	incr(YCheck, YCheck1),
 	calculPositionJeton(X,YCheck1,Y).
 
-
-findPossibleMoves(XCheck,XCheck,Moves) :-
-	writeln(Moves),
+findPossibleMoves(XCheck,XCheck,_) :-
 	!.
+
 findPossibleMoves(XCheck,X,Moves) :-
 	incr(XCheck, XCheck1),
 	coupValide(XCheck),
 	append([XCheck],Moves,MovesA),
-	findPossibleMoves(XCheck1,X,MovesA),
-	!.
+	!,
+	findPossibleMoves(XCheck1,X,MovesA).
+
 findPossibleMoves(XCheck,X,MovesA) :-
 	incr(XCheck, XCheck1),
 	findPossibleMoves(XCheck1,X,MovesA).

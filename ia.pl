@@ -47,5 +47,5 @@ iaMinimax(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsPuissance3,PoidsDensi
 	assert(poidsPuissance3(PoidsPuissance3)),
 	assert(poidsDensite(PoidsDensite)),
 	assert(poidsAdjacence(PoidsAdjacence)),
-	minimax(Profondeur,JoueurCourant,1,Coup,Value).
+	minimax(Profondeur,JoueurCourant,-1,Coup,Value).
 	%parcoursArbre(JoueurCourant,Profondeur,Coup,_).
