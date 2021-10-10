@@ -11,7 +11,7 @@
 
 evaluate_and_choose([Move|Moves], InitPlayer, Depth, MaxMin, Record, Best) :-
 	move(Move, MaxMin, InitPlayer),
-	minimax(Depth, InitPlayer, MaxMin, Move, Value),
+	minimax(Depth, InitPlayer, MaxMin, MoveX, Value),
 	update(Move, Value, Record, Record1),
 	undo_move(Move, Color),
 	evaluate_and_choose(Moves, InitPlayer, Depth, MaxMin, Record1, Best).

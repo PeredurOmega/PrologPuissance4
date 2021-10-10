@@ -55,8 +55,8 @@ iaMinimax(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsPuissance3,PoidsDensi
 	initCaseTest,
 	ennemi(JoueurCourant,AutreJoueur),
 	assert(ennemiTest(AutreJoueur)),
-	ennemiTest(TestJoueur),
 	MaxMin is -1,
 	minimax(Profondeur,JoueurCourant,MaxMin,Coup,Value),
-	retract(caseTest(_,_,_)).
+	retract(ennemiTest(AutreJoueur)),
+	retractall(caseTest(_,_,_)).
 	%parcoursArbre(JoueurCourant,Profondeur,Coup,_).
