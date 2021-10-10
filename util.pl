@@ -15,6 +15,8 @@
 	caseVide/2
 ]).
 
+:- use_module(minimaxdraw).
+
 %%%%%%%%%%%%%%%%
 %% Constantes %%
 %%%%%%%%%%%%%%%%
@@ -61,4 +63,4 @@ sum([X|Xs],N) :-
 caseVide(X,Y) :-
 	nonvar(X),
 	nonvar(Y),
-	not(case(X,Y,_)).
+	not(case(X,Y,_)),not(caseTest(X,Y,_)).

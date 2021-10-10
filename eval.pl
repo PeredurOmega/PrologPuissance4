@@ -1,7 +1,7 @@
 ﻿%%%%%%%%%%%% eval.pl %%%%%%%%%%%%
 % Différentes fonctions d'évaluation pour le Puissance 4, toutes basées sur des heuristiques différentes.
 
-:- module(eval, [evalJeu/5, evalTest1/2, evalPosition/3, caseVideTest/2]).
+:- module(eval, [evalTest1/2, evalPosition/3, caseVideTest/2]).
 
 %%%%%%%%%%%%%%%%
 %% Inclusions %%
@@ -14,7 +14,6 @@
 
 :- use_module(library(random)).
 
-:- dynamic ennemiTest/1.
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Prédicats publics %%
@@ -23,22 +22,22 @@
 % evalJeu/5(+JoueurCourant, +AutreJoueur, +X, +Y, -Score)
 % Évalue la situation courante pour le joueur JoueurCourant étant donné que le dernier coup joué fut joué en (X,Y). Le score est pondéré par les différentes pondérations données en entrée (par assert) à evalJeu. Le score est ensuite perturbé par une valeur aléatoire, permettant de casser le caractère déterministe de l'IA.
 % Score s'unifie avec le score évalué pour la position courante.
-evalJeu(JoueurCourant,AutreJoueur,X,Y,Score) :-
-	assert(caseTest(X,Y,JoueurCourant)),
-	assert(ennemiTest(AutreJoueur)),
-	poidsPuissance3(PoidsPuissance3), poidsPosition(PoidsPosition), poidsDensite(PoidsDensite), poidsAdjacence(PoidsAdjacence),
-	evalPosition(JoueurCourant,Score1,PoidsPosition),
-	evalPuissances3(JoueurCourant,AutreJoueur,Score2,PoidsPuissance3),
-	densite(JoueurCourant,Score3,PoidsDensite),
-	evalAdjacence(X,Y,_,Score4, PoidsAdjacence),
-	retract(caseTest(X,Y,JoueurCourant)),
-	retract(ennemiTest(AutreJoueur)),
-	random_between(-2,2,Perturbation),
-	Score is Score1 * PoidsPosition
-			+ Score2 * PoidsPuissance3
-			+ Score3
-			+ Score4
-			+ Perturbation.
+% evalJeu(JoueurCourant,AutreJoueur,X,Y,Score) :-
+% 	assert(caseTest(X,Y,JoueurCourant)),
+% 	assert(ennemiTest(AutreJoueur)),
+% 	poidsPuissance3(PoidsPuissance3), poidsPosition(PoidsPosition), poidsDensite(PoidsDensite), poidsAdjacence(PoidsAdjacence),
+% 	evalPosition(JoueurCourant,Score1,PoidsPosition),
+% 	evalPuissances3(JoueurCourant,AutreJoueur,Score2,PoidsPuissance3),
+% 	densite(JoueurCourant,Score3,PoidsDensite),
+% 	evalAdjacence(X,Y,_,Score4, PoidsAdjacence),
+% 	retract(caseTest(X,Y,JoueurCourant)),
+% 	retract(ennemiTest(AutreJoueur)),
+% 	random_between(-2,2,Perturbation),
+% 	Score is Score1 * PoidsPosition
+% 			+ Score2 * PoidsPuissance3
+% 			+ Score3
+% 			+ Score4
+% 			+ Perturbation.
 
 %%%%%%%%%%%%%%%%%%%%%%
 %% Prédicats privés %%

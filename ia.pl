@@ -8,7 +8,8 @@
 			  ,poidsPuissance3/1
 			  ,poidsPosition/1
 			  ,poidsDensite/1
-			  ,poidsAdjacence/1]
+			  ,poidsAdjacence/1,
+				ennemiTest/1]
 ).
 
 %%%%%%%%%%%%%%%%
@@ -27,6 +28,7 @@
 :- dynamic poidsPosition/1.
 :- dynamic poidsDensite/1.
 :- dynamic poidsAdjacence/1.
+:- dynamic ennemiTest/1.
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Prédicats publics %%
@@ -42,10 +44,19 @@ iaAleatoire(Coup) :-
 
 get_best((Move, Value), Move).
 
+initCaseTest :- case(X,Y,Z), assert(caseTest(X,Y,Z)), false. %on assert une caseTest pour toutes les cases.
+initCaseTest.
+
 iaMinimax(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsPuissance3,PoidsDensite,PoidsAdjacence) :-
 	assert(poidsPosition(PoidsPosition)),
 	assert(poidsPuissance3(PoidsPuissance3)),
 	assert(poidsDensite(PoidsDensite)),
 	assert(poidsAdjacence(PoidsAdjacence)),
-	minimax(Profondeur,JoueurCourant,-1,Coup,Value).
+	initCaseTest,
+	ennemi(JoueurCourant,AutreJoueur),
+	assert(ennemiTest(AutreJoueur)),
+	ennemiTest(TestJoueur),
+	MaxMin is -1,
+	minimax(Profondeur,JoueurCourant,MaxMin,Coup,Value),
+	retract(caseTest(_,_,_)).
 	%parcoursArbre(JoueurCourant,Profondeur,Coup,_).
