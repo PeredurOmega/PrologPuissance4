@@ -18,8 +18,8 @@ public enum Method {
         this.methodType = methodType;
     }
 
-    public static Method getMethod(String s){
-        switch (s){
+    public static Method getMethod(String s) {
+        switch (s) {
             case "GET":
                 return Method.GET;
             case "POST":

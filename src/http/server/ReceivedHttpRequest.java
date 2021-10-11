@@ -2,23 +2,39 @@ package http.server;
 
 import http.utils.Method;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 public class ReceivedHttpRequest {
     HashMap<String, String> headerInfo = new HashMap();
 
     private Method method;
     private String uri;
+    private String contentType;
     private String version;
-    private HashMap<String,String> parameters = new HashMap<>();
+    private String body;
+    private HashMap<String, String> parameters = new HashMap<>();
 
-    ReceivedHttpRequest(String r) {
-        parseRequest(r);
+
+    ReceivedHttpRequest(String request) {
+        parseRequest(request);
+        String path = "./" + this.uri;
+        try {
+            contentType = Files.probeContentType(Paths.get(path));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    ReceivedHttpRequest() {
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 
     public HashMap<String, String> getParameters() {
@@ -33,44 +49,48 @@ public class ReceivedHttpRequest {
         return method;
     }
 
+    public String getContentType() {
+        return contentType;
+    }
+
     public String getUri() {
         return uri;
     }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public void parseRequest(String s){
-        String [] parsedElements = s.split("&&&");
-        String [] mainElement = parsedElements[0].split(" ");
-        System.out.println(mainElement[1]);
-        method = Method.getMethod(mainElement[0]);
-        uri = mainElement[1];
-        version = mainElement[2];
-        for (int i = 1; i<parsedElements.length; i++){
-            String [] splitted = parsedElements[i].split(": ");
+    public void addHeader(String h) {
+        if (!h.equals("")) {
+            String[] splitted = h.split(": ");
             headerInfo.put(splitted[0], splitted[1]);
         }
     }
 
-    public void addHeader(String h){
-        String [] splitted = h.split(": ");
-        headerInfo.put(splitted[0], splitted[1]);
+    public void parseRequest(String s) {
+        try {
+            System.out.println("s : " + s);
+            boolean body = false;
+            int i;
+            String[] parsedElements = s.split("\n");
+            String[] mainElements = parsedElements[0].split(" ");
+            System.out.println(Arrays.toString(mainElements));
+            method = Method.getMethod(mainElements[0]);
+            uri = mainElements[1];
+            version = mainElements[2];
+            for (i = 1; i < parsedElements.length; i++) {
+                String[] splitted = parsedElements[i].split(": ");
+                headerInfo.put(splitted[0], splitted[1]);
+            }
+            System.out.println(headerInfo);
+        }
+        catch (Exception e) {
+
+        }
     }
 
-    public void parseFirstLine(String s){
-        String [] mainElement = s.split(" ");
-        method = Method.getMethod(mainElement[0]);
-        uri = mainElement[1];
-        version = mainElement[2];
-    }
-
-    public void addParameters(String params){
-        String [] parsedParams = params.split("&");
-        for (String parsedParam : parsedParams) {
-            String[] param = parsedParam.split("=");
-            parameters.put(param[0], param[1]);
+    public void addParameters() {
+        String[] parameters = this.body.split("&");
+        for (String param : parameters) {
+            String[] paramInfo = param.split("=");
+            this.parameters.put(paramInfo[0], paramInfo[1]);
         }
     }
 

@@ -3,11 +3,9 @@
 package http.server;
 
 import javax.net.ssl.*;
-import java.io.*;
+import java.io.FileInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 
@@ -73,8 +71,7 @@ public class WebServer {
                 // Création du ServerSocket serverSocket'appuyant sur le protocole SSL défini à l'aide de la SSLServerSocketFactory
                 serverSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(3000);
             }
-        }
-         catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
