@@ -55,7 +55,7 @@ iaMinimax(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsPuissance3,PoidsDensi
 	initCaseTest,
 	ennemi(JoueurCourant,AutreJoueur),
 	assert(ennemiTest(AutreJoueur)),
-	MaxMin is -1,
+	MaxMin is 1,
 	minimax(Profondeur,JoueurCourant,MaxMin,Coup,Value),
 	retract(ennemiTest(AutreJoueur)),
 	retractall(caseTest(_,_,_)).

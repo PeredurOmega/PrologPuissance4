@@ -20,7 +20,7 @@ evaluate_and_choose([], InitPlayer, Depth, MaxMin, Record, Record).
 
 minimax(0, InitPlayer, MaxMin, Move, Value) :-
 	value(InitPlayer, V),
-	Value is V*MaxMin.
+	Value is V.
 
 minimax(Depth, InitPlayer, MaxMin, Move, Value) :-
 	Depth > 0,
