@@ -1,7 +1,7 @@
 ﻿%%%%%%%%%%%% eval.pl %%%%%%%%%%%%
 % Différentes fonctions d'évaluation pour le Puissance 4, toutes basées sur des heuristiques différentes.
 
-:- module(eval, [evalTest1/2, evalPosition/3, caseVideTest/2, evalJeu/2]).
+:- module(eval, [evalTest1/2, evalPosition/3, caseVideTest/2, evalJeu/4]).
 
 %%%%%%%%%%%%%%%%
 %% Inclusions %%
@@ -96,20 +96,37 @@ caseTableauAlignements(6,6,4).
 caseTableauAlignements(7,6,3).
 
 
-evalJeu(Courant,Score) :-
-	poidsPosition(PoidsPosition), poidsAlignement(PoidsAlignement),
+evalJeu(Courant,Score,X,Y) :-
+	poidsPosition(PoidsPosition),
+	poidsAlignement(PoidsAlignement),
+	poidsBlocage(PoidsBlocage),
 	evalPosition(Courant,ScorePosition,PoidsPosition),
-	evalNbAlignements(Courant,ScoreAlignement,PoidsAlignement),
+	evalNbAlignements(Courant,ScoreAlignement,PoidsAlignement,X,Y),
+	evalBlocage(Courant,ScoreBlocage,PoidsBlocage,X,Y),
 	Score is ScorePosition * PoidsPosition 
-		+ ScoreAlignement * PoidsAlignement.
+		+ ScoreAlignement * PoidsAlignement
+		+ ScoreBlocage * PoidsBlocage.
 
 
-evalNbAlignements(Courant,Score,PoidsAlignement) :-
+evalBlocage(Courant,Score,PoidsBlocage,X,Y) :-
+	PoidsBlocage>0,
+	%findall(S, evalCasesBlocage(Courant,S), Scores),
+	evalCasesBlocage(Courant,Score,X,Y).
+	%sum(Scores, ScoreTot),
+	%Score is ScoreTot.
+%evalBlocage(_,0,_,_,_).
+
+evalCasesBlocage(Courant,ScoreCase,X,Y) :-
+	ennemi(Courant,AutreJoueur),
+	%caseTest(X,Y,Courant),
+	calculPoidsAlignements(X,Y,AutreJoueur,ScoreCase).
+
+evalNbAlignements(Courant,Score,PoidsAlignement,X,Y) :-
 	PoidsAlignement>0,
 	findall(S, evalCasesAlignements(Courant,S), Scores),
 	sum(Scores, ScoreTot),
 	Score is ScoreTot.
-evalNbAlignements(_,0,_).
+evalNbAlignements(_,0,_,_,_).
 
 evalCasesAlignements(Courant,ScoreCase) :-
 	caseTest(X,Y,Courant),
@@ -149,9 +166,6 @@ evalCaseNew(X,Y,Courant,Couleur,ScoreCase) :-
 	Couleur \== Courant,
 	caseTableauAlignements(X,Y,Poids),
 	ScoreCase is Poids * -1.
-
-
-
 
 %-------------------------------------------------
 
@@ -235,20 +249,6 @@ zone(3,X,Y) :- X > 4, Y =< 3.
 zone(4,X,Y) :- X > 4, Y > 3.
 zone(5,X,Y) :- X = 4, Y > 3.
 zone(6,X,Y) :- X =<3, Y > 3.
-
-
-
-%%%%% gagneTestDirect %%%%%
-
-
-% gagneTestDirect(X,Y,J) :-
-% 	gagneTestDirectLigne(X,Y,J).
-% gagneTestDirect(X,Y,J) :-
-% 	gagneTestDirectDiag1(X,Y,J).
-% gagneTestDirect(X,Y,J) :-
-% 	gagneTestDirectDiag2(X,Y,J).
-%gagneTestDirect(X,Y,J) :-
-%	gagneTestDirectColonne(X,Y,J).
 
 calculPoidsAlignements(X,Y,J,Score) :-
 	gagneTestDirectLigne(X,Y,J,RfLignes),

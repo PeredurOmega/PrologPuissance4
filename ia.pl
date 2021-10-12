@@ -4,12 +4,13 @@
 % - "Minimax", implémentation de minimax assez paramétrable.
 
 :- module(ia, [iaAleatoire/1
-			  ,iaMinimax/8
+			  ,iaMinimax/9
 			  ,poidsPuissance3/1
 			  ,poidsPosition/1
 			  ,poidsDensite/1
 			  ,poidsAdjacence/1
-			  ,poidsAlignement/1,
+			  ,poidsAlignement/1
+			  ,poidsBlocage/1,
 				ennemiTest/1]
 ).
 
@@ -31,6 +32,7 @@
 :- dynamic poidsAdjacence/1.
 :- dynamic poidsAlignement/1.
 :- dynamic ennemiTest/1.
+:- dynamic poidsBlocage/1.
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Prédicats publics %%
@@ -49,9 +51,10 @@ get_best((Move, Value), Move).
 initCaseTest :- case(X,Y,Z), assert(caseTest(X,Y,Z)), false. %on assert une caseTest pour toutes les cases.
 initCaseTest.
 
-iaMinimax(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsAlignement,PoidsPuissance3,PoidsDensite,PoidsAdjacence) :-
+iaMinimax(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsAlignement,PoidsBlocage,PoidsPuissance3,PoidsDensite,PoidsAdjacence) :-
 	assert(poidsPosition(PoidsPosition)),
 	assert(poidsAlignement(PoidsAlignement)),
+	assert(poidsBlocage(PoidsBlocage)),
 	assert(poidsPuissance3(PoidsPuissance3)),
 	assert(poidsDensite(PoidsDensite)),
 	assert(poidsAdjacence(PoidsAdjacence)),
@@ -62,7 +65,6 @@ iaMinimax(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsAlignement,PoidsPuiss
 	minimax(Profondeur,JoueurCourant,MaxMin,Coup,Value),
 	retract(ennemiTest(AutreJoueur)),
 	retractall(caseTest(_,_,_)).
-	%parcoursArbre(JoueurCourant,Profondeur,Coup,_).
 
 setMaxMin(JoueurCourant,MaxMin) :-
 	JoueurCourant == rouge,

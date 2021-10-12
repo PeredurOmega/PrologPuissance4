@@ -14,7 +14,7 @@ ponderate((Move,Value),MaxMin,(Move,PonderatedValue)) :-
 
 evaluate_and_choose([Move|Moves], InitPlayer, Depth, MaxMin, Record, Best) :-
 	move(Move, MaxMin, InitPlayer),
-	minimax(Depth, InitPlayer, MaxMin, MoveX, Value),
+	minimax(Depth, InitPlayer, MaxMin, Move, Value),
 	update(Move, Value, Record, Record1, MaxMin),
 	%ponderate(Record1, MaxMin, Record2),
 	undo_move(Move, Color),
@@ -23,7 +23,9 @@ evaluate_and_choose([Move|Moves], InitPlayer, Depth, MaxMin, Record, Best) :-
 evaluate_and_choose([], InitPlayer, Depth, MaxMin, Record, Record).
 
 minimax(0, InitPlayer, MaxMin, Move, Value) :-
-	value(InitPlayer, V, MaxMin),
+	calculPositionJeton(Move, 1, Y),
+	Y1 is Y-1,
+	value(InitPlayer, V, MaxMin, Move, Y1),
 	Value is V.
 
 minimax(Depth, InitPlayer, MaxMin, Move, Value) :-
@@ -34,7 +36,7 @@ minimax(Depth, InitPlayer, MaxMin, Move, Value) :-
 	%MinMax := -MaxMin,
 	NewDepth is Depth-1,
 	NewMaxMin is -MaxMin,
-	evaluate_and_choose(Moves, InitPlayer, NewDepth, NewMaxMin, (nil, 1000*MaxMin), (Move, Value)).
+	evaluate_and_choose(Moves, InitPlayer, NewDepth, NewMaxMin, (nil, 100000*MaxMin), (Move, Value)).
 
 update(Move, Value, (Move1, Value1), (Move1, Value1), MinMax) :-
 	MinMax > 0,
@@ -86,9 +88,9 @@ undo_move(Move, Color) :-
 	LinePos is X-1,
 	retract(caseTest(Move, LinePos, Color)).
 
-value(InitPlayer, V, MaxMin) :-
+value(InitPlayer, V, MaxMin, X, Y) :-
 	couleurJoueurCourant(InitPlayer, MaxMin, Couleur),
-	evalJeu(Couleur,Score),
+	evalJeu(Couleur,Score, X, Y),
 	V is Score.
 
 couleurJoueurCourant(InitPlayer, MaxMin, Couleur) :-
