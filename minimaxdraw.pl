@@ -8,11 +8,15 @@
 
 :- dynamic caseTest/3.
 
+ponderate((Move,Value),MaxMin,(Move,PonderatedValue)) :- 
+	PonnderatedValue is Value * MaxMin.
+
 
 evaluate_and_choose([Move|Moves], InitPlayer, Depth, MaxMin, Record, Best) :-
 	move(Move, MaxMin, InitPlayer),
 	minimax(Depth, InitPlayer, MaxMin, MoveX, Value),
-	update(Move, Value, Record, Record1),
+	update(Move, Value, Record, Record1, MaxMin),
+	%ponderate(Record1, MaxMin, Record2),
 	undo_move(Move, Color),
 	evaluate_and_choose(Moves, InitPlayer, Depth, MaxMin, Record1, Best).
 
@@ -30,13 +34,23 @@ minimax(Depth, InitPlayer, MaxMin, Move, Value) :-
 	%MinMax := -MaxMin,
 	NewDepth is Depth-1,
 	NewMaxMin is -MaxMin,
-	evaluate_and_choose(Moves, InitPlayer, NewDepth, NewMaxMin, (nil, -1000), (Move, Value)).
+	evaluate_and_choose(Moves, InitPlayer, NewDepth, NewMaxMin, (nil, 1000*MaxMin), (Move, Value)).
 
-update(Move, Value, (Move1, Value1), (Move1, Value1)) :-
+update(Move, Value, (Move1, Value1), (Move1, Value1), MinMax) :-
+	MinMax > 0,
 	Value =< Value1,!.
 
-update(Move, Value, (Move1, Value1), (Move, Value)) :-
-	Value > Value1.
+update(Move, Value, (Move1, Value1), (Move, Value), MinMax) :-
+	MinMax > 0,
+	Value > Value1,!.
+
+update(Move, Value, (Move1, Value1), (Move1, Value1), MinMax) :-
+	MinMax < 0,
+	Value > Value1,!.
+
+update(Move, Value, (Move1, Value1), (Move, Value), MinMax) :-
+	MinMax < 0,
+	Value =< Value1.
 
 move(Move, MinMax, InitPlayer) :- 
 	InitPlayer==jaune, 
