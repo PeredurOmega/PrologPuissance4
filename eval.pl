@@ -1,7 +1,7 @@
 ﻿%%%%%%%%%%%% eval.pl %%%%%%%%%%%%
 % Différentes fonctions d'évaluation pour le Puissance 4, toutes basées sur des heuristiques différentes.
 
-:- module(eval, [evalTest1/2, evalPosition/3, caseVideTest/2]).
+:- module(eval, [evalTest1/2, evalPosition/3, caseVideTest/2, evalJeu/2]).
 
 %%%%%%%%%%%%%%%%
 %% Inclusions %%
@@ -46,29 +46,90 @@
 % evalPosition/3(+Courant,-Score,+PoidsPosition)
 % Évalue en privilégiant les positions centrales en fonction de la pondération.
 % Score s'unifie à une valeur entre -400 et 400.
+
+caseTableauAlignements(1,1,3).
+caseTableauAlignements(2,1,4).
+caseTableauAlignements(3,1,5).
+caseTableauAlignements(4,1,7).
+caseTableauAlignements(5,1,5).
+caseTableauAlignements(6,1,4).
+caseTableauAlignements(7,1,3).
+
+caseTableauAlignements(1,2,4).
+caseTableauAlignements(2,2,6).
+caseTableauAlignements(3,2,8).
+caseTableauAlignements(4,2,10).
+caseTableauAlignements(5,2,8).
+caseTableauAlignements(6,2,6).
+caseTableauAlignements(7,2,4).
+
+caseTableauAlignements(1,3,5).
+caseTableauAlignements(2,3,8).
+caseTableauAlignements(3,3,11).
+caseTableauAlignements(4,3,13).
+caseTableauAlignements(5,3,11).
+caseTableauAlignements(6,3,8).
+caseTableauAlignements(7,3,5).
+
+caseTableauAlignements(1,4,5).
+caseTableauAlignements(2,4,8).
+caseTableauAlignements(3,4,11).
+caseTableauAlignements(4,4,13).
+caseTableauAlignements(5,4,11).
+caseTableauAlignements(6,4,8).
+caseTableauAlignements(7,4,5).
+
+caseTableauAlignements(1,5,4).
+caseTableauAlignements(2,4,6).
+caseTableauAlignements(3,5,8).
+caseTableauAlignements(4,5,10).
+caseTableauAlignements(5,5,8).
+caseTableauAlignements(6,5,6).
+caseTableauAlignements(7,5,4).
+
+caseTableauAlignements(1,6,3).
+caseTableauAlignements(2,6,4).
+caseTableauAlignements(3,6,5).
+caseTableauAlignements(4,6,7).
+caseTableauAlignements(5,6,5).
+caseTableauAlignements(6,6,4).
+caseTableauAlignements(7,6,3).
+
+
+evalJeu(Courant,Score) :-
+	poidsPosition(PoidsPosition), poidsAlignement(PoidsAlignement),
+	evalPosition(Courant,ScorePosition,PoidsPosition),
+	evalNbAlignements(Courant,ScoreAlignement,PoidsAlignement),
+	Score is ScorePosition * PoidsPosition 
+		+ ScoreAlignement * PoidsAlignement.
+
+
+evalNbAlignements(Courant,Score,PoidsAlignement) :-
+	PoidsAlignement>0,
+	findall(S, evalCasesAlignements(Courant,S), Scores),
+	sum(Scores, ScoreTot),
+	Score is ScoreTot.
+evalNbAlignements(_,0,_).
+
+evalCasesAlignements(Courant,ScoreCase) :-
+	caseTest(X,Y,Courant),
+	calculPoidsAlignements(X,Y,Courant,ScoreCase).
+	
+
 evalPosition(Courant,Score,PoidsPosition) :-
 	PoidsPosition>0,
-	assert(nbCasesPleines(0)),
 	findall(S, evalCases(Courant,S), Scores),
 	sum(Scores, ScoreTot),
-	nbCasesPleines(NbCasesPleinesFinal),
-	retract(nbCasesPleines(NbCasesPleinesFinal)),
-	Score is ScoreTot / (NbCasesPleinesFinal+1).
+	Score is ScoreTot.
 evalPosition(_,0,_).
 
 evalCases(Courant,ScoreCase) :-
-	caseTest(X,Y,_),
-	nbCasesPleines(NbCasesPleines),
-	retract(nbCasesPleines(NbCasesPleines)),
-	incr(NbCasesPleines,NbCasesPleinesF),
-	assert(nbCasesPleines(NbCasesPleinesF)),
-	evalCase(X,Y,Courant,ScoreCase).
+	caseTest(X,Y,Couleur),
+	evalCaseNew(X,Y,Courant,Couleur,ScoreCase).
 
-% renvoie un score entre -400 et 400
-evalCase(X,Y,Courant,ScoreCase) :-
+evalCaseOld(X,Y,Courant,ScoreCase) :-
 	nbColonnes(NBCOLONNES),
 	nbLignes(NBLIGNES),
-	% ponderationJ(X, Y, Courant, PonderationJoueur),
 	CentreX is NBCOLONNES // 2 + 1,
 	CentreY is NBLIGNES // 2 + 1,
 	Dx is X - CentreX,
@@ -76,6 +137,24 @@ evalCase(X,Y,Courant,ScoreCase) :-
 	abs(Dx,AbsX),
 	abs(Dy,AbsY),
 	ScoreCase is ( 200/(AbsX+1) + 200/(AbsY+1) ).
+
+%-------------------------------------------------
+
+evalCaseNew(X,Y,Courant,Couleur,ScoreCase) :-
+	Couleur == Courant,
+	caseTableauAlignements(X,Y,Poids),
+	ScoreCase is Poids.
+
+evalCaseNew(X,Y,Courant,Couleur,ScoreCase) :-
+	Couleur \== Courant,
+	caseTableauAlignements(X,Y,Poids),
+	ScoreCase is Poids * -1.
+
+
+
+
+%-------------------------------------------------
+
 
 ponderationJ(X,Y, Courant,1) :-
 	caseTest(X,Y,Courant), !.
@@ -162,23 +241,48 @@ zone(6,X,Y) :- X =<3, Y > 3.
 %%%%% gagneTestDirect %%%%%
 
 
-gagneTestDirect(X,Y,J) :-
-	gagneTestDirectLigne(X,Y,J).
-gagneTestDirect(X,Y,J) :-
-	gagneTestDirectDiag1(X,Y,J).
-gagneTestDirect(X,Y,J) :-
-	gagneTestDirectDiag2(X,Y,J).
+% gagneTestDirect(X,Y,J) :-
+% 	gagneTestDirectLigne(X,Y,J).
+% gagneTestDirect(X,Y,J) :-
+% 	gagneTestDirectDiag1(X,Y,J).
+% gagneTestDirect(X,Y,J) :-
+% 	gagneTestDirectDiag2(X,Y,J).
+%gagneTestDirect(X,Y,J) :-
+%	gagneTestDirectColonne(X,Y,J).
 
+calculPoidsAlignements(X,Y,J,Score) :-
+	gagneTestDirectLigne(X,Y,J,RfLignes),
+	gagneTestDirectDiag1(X,Y,J,RfDiag1),
+	gagneTestDirectDiag2(X,Y,J,RfDiag2),
+	gagneTestDirectColonne(X,Y,J,RfColonnes),
+	scoreAlignement(RfLignes,ScoreLignes),
+	scoreAlignement(RfDiag1,ScoreDiag1),
+	scoreAlignement(RfDiag2,ScoreDiag2),
+	scoreAlignement(RfColonnes,ScoreColonnes),
+	Score is ScoreLignes + ScoreColonnes + ScoreDiag1 + ScoreDiag2.
+
+scoreAlignement(NbAlignes,Score) :-
+	NbAlignes == 1,
+	Score is 0.
+scoreAlignement(NbAlignes,Score) :-
+	NbAlignes == 2,
+	Score is 10.
+scoreAlignement(NbAlignes,Score) :-
+	NbAlignes == 3,
+	Score is 100.
+scoreAlignement(NbAlignes,Score) :-
+	NbAlignes == 4,
+	Score is 1000.
 
 %%% En ligne %%%
 
-gagneTestDirectLigne(X,Y,J) :-
+gagneTestDirectLigne(X,Y,J, Rf) :-
 	decr(X,X1),
 	gaucheVerif(X1,Y,J,Rg),
-	incr(X,_),
-	droiteVerif(X,_,J,Rd),
+	incr(X,X2),
+	droiteVerif(X2,Y,J,Rd),
 	!,
-	Rf is Rg+Rd, Rf>2.
+	Rf is Rg+Rd+1.
 
 gaucheVerif(X,Y,J,Rg):-
 	gauche(X,Y,J,0,Rg).
@@ -198,9 +302,40 @@ droite(X,Y,J,R,Rg) :-
 	incr(R,R1),
 	droite(X1,Y,J,R1,Rg).
 
+% en colonne %
+
+gagneTestDirectColonne(X,Y,J,Rf) :-
+	decr(Y,Y1),
+	basVerif(X,Y1,J,Rb),
+	incr(Y,Y2),
+	hautVerif(X,Y2,J,Rh),
+	!,
+	Rf is Rh+Rb+1.
+
+basVerif(X,Y,J,Rb):-
+	bas(X,Y,J,0,Rb).
+bas(X,Y,J,R,R) :-
+	not(caseTest(X,Y,J)). %Jusqu'à la case non J
+bas(X,Y,J,R,Rb) :-
+	decr(Y,Y1),
+	incr(R,R1),
+	bas(X,Y1,J,R1,Rb).
+
+hautVerif(X,Y,J,Rh):-
+	haut(X,Y,J,0,Rh).
+haut(X,Y,J,R,R) :-
+	not(caseTest(X,Y,J)). %Jusqu'à la case non J
+haut(X,Y,J,R,Rh) :-
+	incr(Y,Y1),
+	incr(R,R1),
+	haut(x,Y1,J,R1,Rh).
+
+
 %%% En diagonale \ %%%
 
-gagneTestDirectDiag1(X,Y,J) :-
+
+
+gagneTestDirectDiag1(X,Y,J,Rf) :-
 	decr(X,X1),
 	incr(Y,Y1),
 	gaucheHautVerif(X1,Y1,J,Rg),
@@ -208,8 +343,7 @@ gagneTestDirectDiag1(X,Y,J) :-
 	decr(Y,Y2),
 	droiteBasVerif(X2,Y2,J,Rd),
 	!,
-	Rf is Rg+Rd,
-	Rf>2.
+	Rf is Rg+Rd+1.
 
 gaucheHautVerif(X,Y,J,Rg):-
 	gaucheHaut(X,Y,J,0,Rg).
@@ -233,7 +367,7 @@ droiteBas(X,Y,J,R,Rg) :-
 
 %%% En diagonale / %%%
 
-gagneTestDirectDiag2(X,Y,J) :-
+gagneTestDirectDiag2(X,Y,J,Rf) :-
 	decr(X,X1),
 	decr(Y,Y1),
 	gaucheBasVerif(X1,Y1,J,Rg),
@@ -241,8 +375,7 @@ gagneTestDirectDiag2(X,Y,J) :-
 	incr(Y,Y2),
 	droiteHautVerif(X2,Y2,J,Rd),
 	!,
-	Rf is Rg+Rd,
-	Rf>2.
+	Rf is Rg+Rd+1.
 
 gaucheBasVerif(X,Y,J,Rg) :-
 	gaucheBas(X,Y,J,0,Rg).

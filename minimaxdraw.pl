@@ -23,7 +23,7 @@ evaluate_and_choose([Move|Moves], InitPlayer, Depth, MaxMin, Record, Best) :-
 evaluate_and_choose([], InitPlayer, Depth, MaxMin, Record, Record).
 
 minimax(0, InitPlayer, MaxMin, Move, Value) :-
-	value(InitPlayer, V),
+	value(InitPlayer, V, MaxMin),
 	Value is V.
 
 minimax(Depth, InitPlayer, MaxMin, Move, Value) :-
@@ -86,6 +86,15 @@ undo_move(Move, Color) :-
 	LinePos is X-1,
 	retract(caseTest(Move, LinePos, Color)).
 
-value(InitPlayer, V) :-
-	evalPosition(InitPlayer,Score1,1),
-	V is Score1 * 1.
+value(InitPlayer, V, MaxMin) :-
+	couleurJoueurCourant(InitPlayer, MaxMin, Couleur),
+	evalJeu(Couleur,Score),
+	V is Score.
+
+couleurJoueurCourant(InitPlayer, MaxMin, Couleur) :-
+	MaxMin > 0, 
+	Couleur = InitPlayer.
+
+couleurJoueurCourant(InitPlayer, MaxMin, Couleur) :-
+	MaxMin < 0,
+	ennemi(InitPlayer, Couleur).
