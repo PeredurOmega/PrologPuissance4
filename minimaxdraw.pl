@@ -1,5 +1,6 @@
 :- module(minimaxdraw, [caseTest/3
-	,evaluate_and_choose/6,minimax/5]
+	,evaluate_and_choose/6,minimax/5,
+	evaluate_and_choose_ab/8, alpha_beta/7]
 ).
 
 :- use_module(eval).
@@ -8,8 +9,60 @@
 
 :- dynamic caseTest/3.
 
-ponderate((Move,Value),MaxMin,(Move,PonderatedValue)) :- 
-	PonnderatedValue is Value * MaxMin.
+ponderate(MaxMin, 0, Value, Value1) :- 
+	MaxMin < 0,
+	Value1 is Value * MaxMin,!.
+
+ponderate(MaxMin, 0, Value, Value) :- 
+	MaxMin > 0,!.
+
+ponderate(MaxMin, Depth, Value, Value1) :- 
+	Depth > 0,
+	Value1 is -Value.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     Alpha beta		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+evaluate_and_choose_ab([Move|Moves], InitPlayer, Depth, Alpha, Beta, Record, BestMove, MaxMin) :-
+	move(Move, MaxMin, InitPlayer),
+	alpha_beta(Depth, InitPlayer, Alpha, Beta, MoveX, Value, MaxMin),
+	undo_move(Move, Color),
+	ponderate(MaxMin, Depth, Value, Value1),
+	cutoff(Move, Value1, Depth, Alpha, Beta , Moves ,InitPlayer, Record, BestMove, MaxMin).
+
+evaluate_and_choose_ab([], InitPlayer, Depth, Alpha, Beta, Move, (Move, Alpha), MaxMin).
+
+
+alpha_beta(0, InitPlayer, Alpha, Beta, Move, Value, MaxMin) :-
+	value(InitPlayer, Value),
+	!.
+
+alpha_beta(Depth, InitPlayer, Alpha, Beta, Move, Value, MaxMin) :-
+	findall(X, (between(1,7,X),coupValide(X)), Moves),
+	Alpha1 is -Beta,
+	Beta1 is -Alpha,
+	NewDepth is Depth-1,
+	NewMaxMin is -MaxMin,
+	evaluate_and_choose_ab(Moves, InitPlayer, NewDepth, Alpha1, Beta1, nil, (Move, Value), NewMaxMin).
+
+
+cutoff(Move,Value,Depth,Alpha,Beta,Moves, InitPlayer, Move1,(Move1,Value), MaxMin):-
+	Value >= Beta.
+
+cutoff(Move,Value,Depth,Alpha, Beta , Moves, InitPlayer, Move1,BestMove, MaxMin) :- 
+	Alpha < Value,
+	Value < Beta,
+	evaluate_and_choose_ab(Moves, InitPlayer, Depth, Value, Beta, Move, BestMove, MaxMin).
+
+cutoff(Move,Value,Depth,Alpha, Beta , Moves, InitPlayer, Move1,BestMove, MaxMin):- 
+	Value =< Alpha, 
+	evaluate_and_choose_ab(Moves, InitPlayer, Depth, Alpha, Beta, Move1, BestMove, MaxMin).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    Min Max classique  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 evaluate_and_choose([Move|Moves], InitPlayer, Depth, MaxMin, Record, Best) :-

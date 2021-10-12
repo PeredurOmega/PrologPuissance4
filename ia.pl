@@ -9,7 +9,8 @@
 			  ,poidsPosition/1
 			  ,poidsDensite/1
 			  ,poidsAdjacence/1,
-				ennemiTest/1]
+				ennemiTest/1,
+				iaAlphabeta/7]
 ).
 
 %%%%%%%%%%%%%%%%
@@ -60,3 +61,18 @@ iaMinimax(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsPuissance3,PoidsDensi
 	retract(ennemiTest(AutreJoueur)),
 	retractall(caseTest(_,_,_)).
 	%parcoursArbre(JoueurCourant,Profondeur,Coup,_).
+
+iaAlphabeta(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsPuissance3,PoidsDensite,PoidsAdjacence) :-
+	assert(poidsPosition(PoidsPosition)),
+	assert(poidsPuissance3(PoidsPuissance3)),
+	assert(poidsDensite(PoidsDensite)),
+	assert(poidsAdjacence(PoidsAdjacence)),
+	initCaseTest,
+	ennemi(JoueurCourant,AutreJoueur),
+	assert(ennemiTest(AutreJoueur)),
+	Alpha is -99999,
+	Beta is 99999,
+	MaxMin is -1,
+	alpha_beta(Profondeur,JoueurCourant, Alpha, Beta, Coup, Value, MaxMin),
+	retract(ennemiTest(AutreJoueur)),
+	retractall(caseTest(_,_,_)).

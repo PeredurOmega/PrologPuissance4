@@ -68,7 +68,7 @@ evalCases(Courant,ScoreCase) :-
 evalCase(X,Y,Courant,ScoreCase) :-
 	nbColonnes(NBCOLONNES),
 	nbLignes(NBLIGNES),
-	% ponderationJ(X, Y, Courant, PonderationJoueur),
+	ponderationJ(X, Y, Courant, PonderationJoueur),
 	CentreX is NBCOLONNES // 2 + 1,
 	CentreY is NBLIGNES // 2 + 1,
 	Dx is X - CentreX,
