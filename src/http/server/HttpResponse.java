@@ -37,7 +37,7 @@ public class HttpResponse {
             switch (request.getMethod()) {
                 case GET:
                     if (resourceFile.exists()) {
-                        createHeader(StatusCode._200, request.getContentType());
+                        createHeader(StatusCode._200, "text/html");
                         readResource(path);
                         formatReponse();
                     } else {
