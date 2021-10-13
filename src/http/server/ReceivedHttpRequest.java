@@ -5,7 +5,6 @@ import http.utils.Method;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class ReceivedHttpRequest {
@@ -57,21 +56,12 @@ public class ReceivedHttpRequest {
         return uri;
     }
 
-    public void addHeader(String h) {
-        if (!h.equals("")) {
-            String[] splitted = h.split(": ");
-            headerInfo.put(splitted[0], splitted[1]);
-        }
-    }
-
     public void parseRequest(String s) {
         try {
-            System.out.println("s : " + s);
-            boolean body = false;
+            System.out.println("Requête : " + s);
             int i;
             String[] parsedElements = s.split("\n");
             String[] mainElements = parsedElements[0].split(" ");
-            System.out.println(Arrays.toString(mainElements));
             method = Method.getMethod(mainElements[0]);
             uri = mainElements[1];
             version = mainElements[2];
@@ -79,10 +69,9 @@ public class ReceivedHttpRequest {
                 String[] splitted = parsedElements[i].split(": ");
                 headerInfo.put(splitted[0], splitted[1]);
             }
-            System.out.println(headerInfo);
         }
         catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 

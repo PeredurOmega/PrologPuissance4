@@ -3,7 +3,8 @@ package http.server;
 import http.utils.ContentType;
 import http.utils.StatusCode;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -69,13 +70,17 @@ public class HttpResponse {
                     if (ContentType.isTextContentType(request.getContentType())) {
                         try {
                             Files.writeString(Paths.get("./" + request.getUri()), request.getBody(), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+                            createHeader(StatusCode._201, "text/html");
+                            readResource("./files/text/added.html");
+                            formatTextReponse();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                    } else if (ContentType.isImageContentType(request.getContentType())) {
-                       // readResourceImage(path);
+                    } else {
+                        createHeader(StatusCode._415, "text/html");
+                        readResource("./files/text/impossible.html");
+                        formatTextReponse();
                     }
-                    createHeader(StatusCode._201, request.getContentType());
                     break;
                 case DELETE:
                     if (resourceFile.delete()) {
