@@ -68,7 +68,6 @@ evalCases(Courant,ScoreCase) :-
 evalCase(X,Y,Courant,ScoreCase) :-
 	nbColonnes(NBCOLONNES),
 	nbLignes(NBLIGNES),
-	ponderationJ(X, Y, Courant, PonderationJoueur),
 	CentreX is NBCOLONNES // 2 + 1,
 	CentreY is NBLIGNES // 2 + 1,
 	Dx is X - CentreX,
@@ -248,11 +247,15 @@ scoreAlignement(NbAlignes,Score) :-
 	Score is 1000.
 
 evalJeu(Courant,Score) :-
-	poidsPosition(PoidsPosition), poidsAlignement(PoidsAlignement),
+	poidsPosition(PoidsPosition),
+	poidsAlignement(PoidsAlignement),
+	poidsBlocage(PoidsBlocage),
 	evalPosition(Courant,ScorePosition,PoidsPosition),
 	evalNbAlignements(Courant,ScoreAlignement,PoidsAlignement),
+	evalBlocage(Courant,ScoreBlocage,PoidsBlocage),
 	Score is ScorePosition * PoidsPosition 
-		+ ScoreAlignement * PoidsAlignement.
+		+ ScoreAlignement * PoidsAlignement
+		+ ScoreBlocage * PoidsBlocage.
 
 
 evalNbAlignements(Courant,Score,PoidsAlignement) :-
@@ -265,6 +268,19 @@ evalNbAlignements(_,0,_).
 evalCasesAlignements(Courant,ScoreCase) :-
 	caseTest(X,Y,Courant),
 	calculPoidsAlignements(X,Y,Courant,ScoreCase).
+
+evalBlocage(Courant,Score,PoidsBlocage) :-
+	PoidsBlocage>0,
+	findall(S, evalCasesBlocage(Courant,S), Scores),
+	sum(Scores, ScoreTot),
+	Score is ScoreTot.
+evalBlocage(_,0,_).
+
+evalCasesBlocage(Courant,ScoreCase) :-
+	ennemi(Courant,AutreJoueur),
+	caseTest(X,Y,AutreJoueur),
+	calculPoidsAlignements(X,Y,AutreJoueur,Score),
+	ScoreCase is Score * -1.
 	
 evalPosition(Courant,Score,PoidsPosition) :-
 	PoidsPosition>0,
