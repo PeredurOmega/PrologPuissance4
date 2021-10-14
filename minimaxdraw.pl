@@ -32,6 +32,11 @@ evaluate_and_choose_ab([Move|Moves], InitPlayer, Depth, Alpha, Beta, Record, Bes
 	ponderate(MaxMin, Depth, Value, Value1),
 	cutoff(Move, Value1, Depth, Alpha, Beta , Moves ,InitPlayer, Record, BestMove, MaxMin).
 
+% evaluate_and_choose_ab([], InitPlayer, Depth, Alpha, Beta, Move, (Move, Alpha), MaxMin) :-
+% 	Move == nil,
+% 	alpha_beta(0,InitPlayer, Alpha, Beta, MoveX, Value, MaxMin),
+% 	cutoff(Move, Value1, Depth, Alpha, Beta , Moves ,InitPlayer, Record, BestMove, MaxMin).
+
 evaluate_and_choose_ab([], InitPlayer, Depth, Alpha, Beta, Move, (Move, Alpha), MaxMin).
 
 
@@ -41,11 +46,24 @@ alpha_beta(0, InitPlayer, Alpha, Beta, Move, Value, MaxMin) :-
 
 alpha_beta(Depth, InitPlayer, Alpha, Beta, Move, Value, MaxMin) :-
 	findall(X, (between(1,7,X),coupValide(X)), Moves),
+	size(Moves,L),
+	L > 0,
 	Alpha1 is -Beta,
 	Beta1 is -Alpha,
 	NewDepth is Depth-1,
 	NewMaxMin is -MaxMin,
 	evaluate_and_choose_ab(Moves, InitPlayer, NewDepth, Alpha1, Beta1, nil, (Move, Value), NewMaxMin).
+
+alpha_beta(Depth, InitPlayer, Alpha, Beta, Move, Value, MaxMin) :-
+	findall(X, (between(1,7,X),coupValide(X)), Moves),
+	size(Moves,0),
+	alpha_beta(0, InitPlayer, Alpha, Beta, Move, Value, MaxMin).
+
+size([],0).
+
+size([H|T],L) :-
+	size(T,L1),
+	L is 1 + L1.
 
 
 cutoff(Move,Value,Depth,Alpha,Beta,Moves, InitPlayer, Move1,(Move1,Value), MaxMin):-
