@@ -4,15 +4,17 @@
 % - "Minimax", implémentation de minimax assez paramétrable.
 
 :- module(ia, [iaAleatoire/1
-			  ,iaMinimax/9
+			  ,iaMinimax/6
+			  ,iaMinimaxOld/7
 			  ,poidsPuissance3/1
 			  ,poidsPosition/1
 			  ,poidsDensite/1
 			  ,poidsAlignement/1
 			  ,poidsBlocage/1
-			  ,poidsAdjacence/1,
-				ennemiTest/1,
-				iaAlphabeta/9]
+			  ,poidsAdjacence/1
+			  ,initDepth/1
+			  ,ennemiTest/1
+			  ,iaAlphabeta/6]
 ).
 
 %%%%%%%%%%%%%%%%
@@ -22,6 +24,7 @@
 :- use_module(jeu).
 :- use_module(util).
 :- use_module(minimaxdraw).
+:- use_module(miniMax).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Prédicats dynamiques %%
@@ -34,6 +37,7 @@
 :- dynamic poidsAlignement/1.
 :- dynamic poidsBlocage/1.
 :- dynamic ennemiTest/1.
+:- dynamic initDepth/1.
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Prédicats publics %%
@@ -52,11 +56,8 @@ get_best((Move, Value), Move).
 initCaseTest :- case(X,Y,Z), assert(caseTest(X,Y,Z)), false. %on assert une caseTest pour toutes les cases.
 initCaseTest.
 
-iaMinimax(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsAlignement,PoidsBlocage,PoidsPuissance3,PoidsDensite,PoidsAdjacence) :-
+iaMinimax(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsAlignement,PoidsBlocage) :-
 	assert(poidsPosition(PoidsPosition)),
-	assert(poidsPuissance3(PoidsPuissance3)),
-	assert(poidsDensite(PoidsDensite)),
-	assert(poidsAdjacence(PoidsAdjacence)),
 	assert(poidsAlignement(PoidsAlignement)),
 	assert(poidsBlocage(PoidsBlocage)),
 	initCaseTest,
@@ -68,13 +69,11 @@ iaMinimax(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsAlignement,PoidsBloca
 	retractall(caseTest(_,_,_)).
 	%parcoursArbre(JoueurCourant,Profondeur,Coup,_).
 
-iaAlphabeta(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsAlignement,PoidsBlocage,PoidsPuissance3,PoidsDensite,PoidsAdjacence) :-
+iaAlphabeta(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsAlignement,PoidsBlocage) :-
 	assert(poidsPosition(PoidsPosition)),
-	assert(poidsPuissance3(PoidsPuissance3)),
-	assert(poidsDensite(PoidsDensite)),
-	assert(poidsAdjacence(PoidsAdjacence)),
 	assert(poidsAlignement(PoidsAlignement)),
 	assert(poidsBlocage(PoidsBlocage)),
+	assert(initDepth(Profondeur)),
 	initCaseTest,
 	ennemi(JoueurCourant,AutreJoueur),
 	assert(ennemiTest(AutreJoueur)),
@@ -83,4 +82,12 @@ iaAlphabeta(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsAlignement,PoidsBlo
 	MaxMin is -1,
 	alpha_beta(Profondeur,JoueurCourant, Alpha, Beta, Coup, Value, MaxMin),
 	retract(ennemiTest(AutreJoueur)),
+	retract(initDepth(Profondeur)),
 	retractall(caseTest(_,_,_)).
+
+iaMinimaxOld(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsPuissance3,PoidsDensite,PoidsAdjacence) :-
+		assert(poidsPosition(PoidsPosition)),
+		assert(poidsPuissance3(PoidsPuissance3)),
+		assert(poidsDensite(PoidsDensite)),
+		assert(poidsAdjacence(PoidsAdjacence)),
+		parcoursArbre(JoueurCourant,Profondeur,Coup,_).

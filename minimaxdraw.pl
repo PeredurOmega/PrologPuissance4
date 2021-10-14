@@ -137,13 +137,13 @@ move(Move, MinMax, InitPlayer) :-
 
 move(Move, MinMax, InitPlayer) :- 
 	InitPlayer==rouge, 
-	MinMax < 0,
+	MinMax > 0,
 	calculPositionJeton(Move, 1, X),
 	assert(caseTest(Move, X, rouge)),!.
 
 move(Move, MinMax, InitPlayer) :- 
 	InitPlayer==rouge, 
-	MinMax > 0,
+	MinMax < 0,
 	calculPositionJeton(Move, 1, X),
 	assert(caseTest(Move, X, jaune)).
 
@@ -158,5 +158,16 @@ undo_move(Move, Color) :-
 	retract(caseTest(Move, LinePos, Color)).
 
 value(InitPlayer, V) :-
+	% couleurJoueurCourant(InitPlayer, Courant),
 	evalJeu(InitPlayer,Score),
 	V is Score.
+
+% couleurJoueurCourant(InitPlayer, Couleur) :-
+% 	initDepth(DepthInit),
+% 	mod(DepthInit,2) =:= 0, 
+% 	Couleur = InitPlayer.
+
+% couleurJoueurCourant(InitPlayer, Couleur) :-
+% 	initDepth(DepthInit),
+% 	mod(DepthInit,2) =:= 1, 
+% 	ennemi(InitPlayer, Couleur).

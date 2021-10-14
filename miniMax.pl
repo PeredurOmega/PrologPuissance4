@@ -1,20 +1,20 @@
 ﻿%%%%%%%%%%%% miniMax.pl %%%%%%%%%%%%
 % Implémentation de minimax avec diverses optimisations propres au Puissance 4.
 
-:- module(miniMax, [parcoursArbre/4, caseTest/3, gagneTest/4]).
+:- module(miniMax, [parcoursArbre/4, caseTestOld/3, gagneTest/4]).
 
 %%%%%%%%%%%%%%%%
 %% Inclusions %%
 %%%%%%%%%%%%%%%%
 
 :- use_module(util).
-:- use_module(eval).
+:- use_module(evalOld).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Prédicats dynamiques %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- dynamic caseTest/3.
+:- dynamic caseTestOld/3.
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Prédicats publics %%
@@ -38,11 +38,11 @@ parcoursArbre(J,Pmax,R,Value) :-
 %% Prédicats privés %%
 %%%%%%%%%%%%%%%%%%%%%%
 
-initCaseTest :- case(X,Y,Z), assert(caseTest(X,Y,Z)), false. %on assert une caseTest pour toutes les cases.
+initCaseTest :- case(X,Y,Z), assert(caseTestOld(X,Y,Z)), false. %on assert une caseTestOld pour toutes les cases.
 initCaseTest.
 
 clearTest :-
-	retractall(caseTest(X,Y,_)),
+	retractall(caseTestOld(X,Y,_)),
 	retractall(feuille(X,Y)),
 	retract(maximizer(X)), retract(joueurCourant(_)). % on eve tout ce que l'on a ajouté.
 
@@ -51,11 +51,11 @@ parcours(X, _, _, L, _, _) :-
 parcours(X, _, _, L, _, _):-
 	nbLignes(MaxLignes),jeu:case(X,MaxLignes,_), joueurCourant(Joue), not(maximizer(Joue)), infinitePos(2,Value), assert(feuille(L, Value)). % on ne peut PAS jouer, on met +infini
 parcours(X, _, _, L, _, _):-
-	nbLignes(MaxLignes),caseTest(X,MaxLignes,_), joueurCourant(Joue), evaluate(X,MaxLignes,Joue,Value), assert(feuille(L, Value)) .% on ne peut plus jouer, on met une feuille (on évalue)
+	nbLignes(MaxLignes),caseTestOld(X,MaxLignes,_), joueurCourant(Joue), evaluate(X,MaxLignes,Joue,Value), assert(feuille(L, Value)) .% on ne peut plus jouer, on met une feuille (on évalue)
 parcours(X, P, _, L, _, _):-
 	joueurCourant(Joue), calculPositionJeton(X, 1, Y), gagneTest(X,Y,Joue,Direct), victoireDirecte(X,Y,Joue,L,P,Direct).
 
-parcours(X, P, Pmax, L, _, _):- P==Pmax,joueurCourant(Joue), placerJeton(X,Y,Joue), evaluate(X, Y, Joue, Value),assert(feuille(L, Value)),retract(caseTest(X,Y,Joue)). % on est à la prof max, on evalue et on met une feuille
+parcours(X, P, Pmax, L, _, _):- P==Pmax,joueurCourant(Joue), placerJeton(X,Y,Joue), evaluate(X, Y, Joue, Value),assert(feuille(L, Value)),retract(caseTestOld(X,Y,Joue)). % on est à la prof max, on evalue et on met une feuille
 parcours(X, P, Pmax, L, Beta, Alpha) :- incr(P, P1),joueurCourant(Joue), placerJeton(X,Y,Joue), %on incremente la profondeur, puis on joue un coup(qui réussit a tous les coups)
 	setJoueur(P1), %on set le joueur
 	attribueVal(ValeurPrec), % on initialise val
@@ -83,7 +83,7 @@ parcours(X, P, Pmax, L, Beta, Alpha) :- incr(P, P1),joueurCourant(Joue), placerJ
 	joueCoupSuivant(Val6,7,P1,Pmax,L,Beta6,Alpha6,Valeur,_,_),%on tente le coup suivant (ou pas si élagage), avec la valeur retournée par le précédent
 	setJoueur(P1), %on change de joueur
 
-	retract(caseTest(X,Y,Joue)), %on annule le coup pour poursuivre dans l'arbre
+	retract(caseTestOld(X,Y,Joue)), %on annule le coup pour poursuivre dans l'arbre
 	feuille([1|L], _),feuille([2|L], _), %on cherche les feuilles associées (elles ont été calculées plus bas dans l'arbre)
 	setJoueur(P1), %on change de joueur
 	assert(feuille(L,Valeur)),joueurCourant(_). %on met notre feuille calculée
@@ -92,27 +92,27 @@ parcours(X, P, Pmax, L, Beta, Alpha) :- incr(P, P1),joueurCourant(Joue), placerJ
 victoireDirecte(_,_,J,L,P,1):- maximizer(J), Pp is 1-P, infinitePos(Pp,Value), assert(feuille(L, Value)). %Victoire du max
 victoireDirecte(_,_,J,L,P,1):- not(maximizer(J)), Pp is 1-P, infiniteNeg(Pp,Value), assert(feuille(L, Value)). %Victoire du min
 
-victoireDirecte(X,Y,J,_,_,0):- assert(caseTest(X,Y,J)), false.
+victoireDirecte(X,Y,J,_,_,0):- assert(caseTestOld(X,Y,J)), false.
 
 victoireDirecte(X,Y,J,L,P,0):- maximizer(J), Pp is -P, infinitePos(Pp,Value),
 	autreJoueur(J2), testDefaiteProchaine(J2),
-	assert(feuille(L, Value)), retract(caseTest(X,Y,J)). %Victoire anticipée du max
+	assert(feuille(L, Value)), retract(caseTestOld(X,Y,J)). %Victoire anticipée du max
 victoireDirecte(X,Y,J,L,P,0):- not(maximizer(J)), Pp is -P, infiniteNeg(Pp,Value),
 	autreJoueur(J2), testDefaiteProchaine(J2),
-	assert(feuille(L, Value)), retract(caseTest(X,Y,J)). %Victoire anticipée du min
+	assert(feuille(L, Value)), retract(caseTestOld(X,Y,J)). %Victoire anticipée du min
 
-victoireDirecte(X,Y,J,_,_,0):- retract(caseTest(X,Y,J)), false. %ménage si on perde derrière
+victoireDirecte(X,Y,J,_,_,0):- retract(caseTestOld(X,Y,J)), false. %ménage si on perde derrière
 
-victoireDirecte(X,Y,J,_,_,-5):- assert(caseTest(X,Y,J)), false.
+victoireDirecte(X,Y,J,_,_,-5):- assert(caseTestOld(X,Y,J)), false.
 
 victoireDirecte(X,Y,J,L,P,-5):- maximizer(J), Pp is -5-P, infinitePos(Pp,Value),
 	autreJoueur(J2), testDefaiteAnticipeeProchaine(J2),
-	assert(feuille(L, Value)), retract(caseTest(X,Y,J)). %Victoire anticipée du max
+	assert(feuille(L, Value)), retract(caseTestOld(X,Y,J)). %Victoire anticipée du max
 victoireDirecte(X,Y,J,L,P,-5):- not(maximizer(J)), Pp is -5-P, infiniteNeg(Pp,Value),
 	autreJoueur(J2), testDefaiteAnticipeeProchaine(J2),
-	assert(feuille(L, Value)), retract(caseTest(X,Y,J)). %Victoire anticipée du min
+	assert(feuille(L, Value)), retract(caseTestOld(X,Y,J)). %Victoire anticipée du min
 
-victoireDirecte(X,Y,J,_,_,-5):- retract(caseTest(X,Y,J)), false. %ménage si on perde derrière
+victoireDirecte(X,Y,J,_,_,-5):- retract(caseTestOld(X,Y,J)), false. %ménage si on perde derrière
 
 testDefaiteProchaine(J):-
 	calculPositionJeton(1,1,Y1), not(gagneTestDirect(1,Y1,J)),
@@ -137,7 +137,7 @@ testDefaiteAnticipeeProchaine(J):-
 % Score s'unifie au score de la position.
 evaluate(X,Y,Joueur,Score) :-
 	ennemi(Joueur,AutreJoueur),
-	evalJeu(Joueur,AutreJoueur,X,Y,Score1),
+	evalJeuOld(Joueur,AutreJoueur,X,Y,Score1),
 	minOuMax(Joueur,Score1,Score).
 
 minOuMax(Joueur,Score,-Score):- %minimizer
@@ -216,23 +216,23 @@ placerJeton(X,Y,C) :- coupValide(X), insererJeton(X, Y, C).
 % coupValide/1(-Colonne)
 % Vérifie si un jeton est jouable dans cette colonne.
 % Vrai si le coup est valide.
-coupValide(X) :- nbColonnes(NBCOLONNES), X=<NBCOLONNES, X>=1, nbLignes(NBLIGNES), caseVideTest(X,NBLIGNES).
+coupValide(X) :- nbColonnes(NBCOLONNES), X=<NBCOLONNES, X>=1, nbLignes(NBLIGNES), caseVideTestOld(X,NBLIGNES).
 
 % insererJeton/3(-Colonne, +Ligne, -Couleur)
 % Insère, sans vérification, un jeton de la couleur donnée, dans la colonne donnée.
 % Y s'unifie à la ligne d'insertion,
-insererJeton(X,Y,C) :- calculPositionJeton(X, 1, Y), assert(caseTest(X,Y,C)).
+insererJeton(X,Y,C) :- calculPositionJeton(X, 1, Y), assert(caseTestOld(X,Y,C)).
 
 % calculPositionJeton/3(+Colonne,+LigneToCheck,-Ligne)
 % Calcule la première ligne vide d'une colonne.
 % Ligne s'unfinie à l'indice de la première ligne vide de la colonne.
-calculPositionJeton(X,YCheck,YCheck) :- caseVideTest(X,YCheck), !.
+calculPositionJeton(X,YCheck,YCheck) :- caseVideTestOld(X,YCheck), !.
 calculPositionJeton(X,YCheck,Y) :- incr(YCheck, YCheck1), calculPositionJeton(X,YCheck1,Y).
 
 %%% Détection de la victoire des cases de test.
 
 gagneTest(X,Y,J,V) :- %V=1 si victoire direct, 0 si indirect
-	assert(caseTest(X,Y,J)),
+	assert(caseTestOld(X,Y,J)),
 	gagneColonneTest(X,Y,J,R1,A1),
 	gagneLigneTest(X,Y,J,R2,P2,A2),
 	gagneDiag1Test(X,Y,J,R3,P3,A3),
@@ -240,9 +240,9 @@ gagneTest(X,Y,J,V) :- %V=1 si victoire direct, 0 si indirect
 	Pf is P2+P3+P4,
 	Af is A1+A2+A3+A4,
 	testFinal(R1,R2,R3,R4,Pf,Af,V),
-	retract(caseTest(X,Y,J)).
+	retract(caseTestOld(X,Y,J)).
 
-gagneTest(X,Y,J,0):-retract(caseTest(X,Y,J)), false. %ménage
+gagneTest(X,Y,J,0):-retract(caseTestOld(X,Y,J)), false. %ménage
 
 testPotentielAccumulation(X,Y,J,P,A):-
 	testPotentiel(X,Y,J,P), %Peut on la remplir au prochain coup?
@@ -251,17 +251,17 @@ testPotentielAccumulation(X,Y,J,P,A):-
 testPotentiel(_,1,_,1).	%case au niveau 1
 testPotentiel(X,Y,_,1):-
 	decr(Y,Y1),
-	caseTest(X,Y1,_).  %On peut la remplir
+	caseTestOld(X,Y1,_).  %On peut la remplir
 testPotentiel(_,_,_,0). %On ne peut pas la remplir
 
 
-testAccumulation(X,Y,J,1) :- incr(Y,Y1), caseTestValideVide(X,Y1), gagneTestDirect(X,Y1,J). %Case au dessus gagnante aussi
-testAccumulation(X,Y,J,1) :- decr(Y,Y1), caseTestValideVide(X,Y1), gagneTestDirect(X,Y1,J). %Case en dessous gagnante aussi
+testAccumulation(X,Y,J,1) :- incr(Y,Y1), caseTestOldValideVide(X,Y1), gagneTestDirect(X,Y1,J). %Case au dessus gagnante aussi
+testAccumulation(X,Y,J,1) :- decr(Y,Y1), caseTestOldValideVide(X,Y1), gagneTestDirect(X,Y1,J). %Case en dessous gagnante aussi
 testAccumulation(_,_,_,0). %Pas d'accumulation.
 
-caseTestValideVide(X,Y):-
+caseTestOldValideVide(X,Y):-
 	nbColonnes(NBCOLONNES), X=<NBCOLONNES, X>=1,
-	caseVideTest(X,Y). %Case vide
+	caseVideTestOld(X,Y). %Case vide
 
 testFinal(R1,_,_,_,_,_,1):-
 	R1 > 2.
@@ -283,16 +283,16 @@ testFinal(_,_,_,_,_,A,-5):-
 
 gagneColonneTest(X,Y,J,3,0) :-
 	decr(Y,Y1),
-	caseTest(X,Y1,J),
+	caseTestOld(X,Y1,J),
 	decr(Y1,Y2),
-	caseTest(X,Y2,J),
+	caseTestOld(X,Y2,J),
 	decr(Y2,Y3),
-	caseTest(X,Y3,J). %ligne en bas
+	caseTestOld(X,Y3,J). %ligne en bas
 gagneColonneTest(X,Y,J,0,1) :-
 	decr(Y,Y1),
-	caseTest(X,Y1,J),
+	caseTestOld(X,Y1,J),
 	decr(Y1,Y2),
-	caseTest(X,Y2,J),
+	caseTestOld(X,Y2,J),
 	incr(Y,Ytemp),
 	incr(Ytemp,Ydessus),
 	gagneTestDirect(X,Ydessus,J).
@@ -311,11 +311,11 @@ gagneLigneTest(X,Y,J,Rf,Pf,Af) :-
 gaucheTestVerif(X,Y,J,Rg,Pg,Ag):-
 	gaucheTest(X,Y,J,0,Rg,Pg,Ag).
 gaucheTest(X,Y,J,R,R,Pg,Ag):-
-	caseTestValideVide(X,Y),	%case dans le tableau et vide
+	caseTestOldValideVide(X,Y),	%case dans le tableau et vide
 	gagneTestDirectLigne(X,Y,J),	%gagnante
 	testPotentielAccumulation(X,Y,J,Pg,Ag).		%Peut on la placer et a-t-on accumulation?
 gaucheTest(X,Y,J,R,R,0,0) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la caseTest non J
+	not(caseTestOld(X,Y,J)). %Jusqu'à la caseTestOld non J
 gaucheTest(X,Y,J,R,Rg,Pg,Ag) :-
 	decr(X,X1),
 	incr(R,R1),
@@ -324,11 +324,11 @@ gaucheTest(X,Y,J,R,Rg,Pg,Ag) :-
 droiteTestVerif(X,Y,J,Rg,Pg,Ag):-
 	droiteTest(X,Y,J,0,Rg,Pg,Ag).
 droiteTest(X,Y,J,R,R,Pg,Ag):-
-	caseTestValideVide(X,Y),	%case dans le tableau et vide
+	caseTestOldValideVide(X,Y),	%case dans le tableau et vide
 	gagneTestDirectLigne(X,Y,J),	%gagnante
 	testPotentielAccumulation(X,Y,J,Pg,Ag).		%Peut on la placer et a-t-on accumulation?
 droiteTest(X,Y,J,R,R,0,0) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la caseTest non J
+	not(caseTestOld(X,Y,J)). %Jusqu'à la caseTestOld non J
 droiteTest(X,Y,J,R,Rg,Pg,Ag) :-
 	incr(X,X1),
 	incr(R,R1),
@@ -349,11 +349,11 @@ gagneDiag1Test(X,Y,J,Rf,Pf,Af) :-
 gaucheTestHautVerif(X,Y,J,Rg,Pg,Ag):-
 	gaucheTestHaut(X,Y,J,0,Rg,Pg,Ag).
 gaucheTestHaut(X,Y,J,R,R,Pg,Ag):-
-	caseTestValideVide(X,Y),	%case dans le tableau et vide
+	caseTestOldValideVide(X,Y),	%case dans le tableau et vide
 	gagneTestDirectDiag1(X,Y,J),	%gagnante
 	testPotentielAccumulation(X,Y,J,Pg,Ag).		%Peut on la placer et a-t-on accumulation?
 gaucheTestHaut(X,Y,J,R,R,0,0) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la caseTest non J
+	not(caseTestOld(X,Y,J)). %Jusqu'à la caseTestOld non J
 gaucheTestHaut(X,Y,J,R,Rg,Pg,Ag) :-
 	incr(Y,Y1),
 	decr(X,X1),
@@ -363,11 +363,11 @@ gaucheTestHaut(X,Y,J,R,Rg,Pg,Ag) :-
 droiteTestBasVerif(X,Y,J,Rg,Pg,Ag):-
 	droiteTestBas(X,Y,J,0,Rg,Pg,Ag).
 droiteTestBas(X,Y,J,R,R,Pg,Ag):-
-	caseTestValideVide(X,Y),	%case dans le tableau et vide
+	caseTestOldValideVide(X,Y),	%case dans le tableau et vide
 	gagneTestDirectDiag1(X,Y,J),	%gagnante
 	testPotentielAccumulation(X,Y,J,Pg,Ag).		%Peut on la placer et a-t-on accumulation?
 droiteTestBas(X,Y,J,R,R,0,0) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la caseTest non J
+	not(caseTestOld(X,Y,J)). %Jusqu'à la caseTestOld non J
 droiteTestBas(X,Y,J,R,Rg,Pg,Ag) :-
 	decr(Y,Y1),
 	incr(X,X1),
@@ -389,11 +389,11 @@ gagneDiag2Test(X,Y,J,Rf,Pf,Af) :-
 gaucheTestBasVerif(X,Y,J,Rg,Pg,Ag) :-
 	gaucheTestBas(X,Y,J,0,Rg,Pg,Ag).
 gaucheTestBas(X,Y,J,R,R,Pg,Ag):-
-	caseTestValideVide(X,Y),	%case dans le tableau et vide
+	caseTestOldValideVide(X,Y),	%case dans le tableau et vide
 	gagneTestDirectDiag2(X,Y,J),	%gagnante
 	testPotentielAccumulation(X,Y,J,Pg,Ag).		%Peut on la placer et a-t-on accumulation?
 gaucheTestBas(X,Y,J,R,R,0,0) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la caseTest non J
+	not(caseTestOld(X,Y,J)). %Jusqu'à la caseTestOld non J
 gaucheTestBas(X,Y,J,R,Rg,Pg,Ag) :-
 	decr(Y,Y1),
 	decr(X,X1),
@@ -403,11 +403,11 @@ gaucheTestBas(X,Y,J,R,Rg,Pg,Ag) :-
 droiteTestHautVerif(X,Y,J,Rg,Pg,Ag) :-
 	droiteTestHaut(X,Y,J,0,Rg,Pg,Ag).
 droiteTestHaut(X,Y,J,R,R,Pg,Ag):-
-	caseTestValideVide(X,Y),	%case dans le tableau et vide
+	caseTestOldValideVide(X,Y),	%case dans le tableau et vide
 	gagneTestDirectDiag2(X,Y,J),	%gagnante
 	testPotentielAccumulation(X,Y,J,Pg,Ag).		%Peut on la placer et a-t-on accumulation?
 droiteTestHaut(X,Y,J,R,R,0,0) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la caseTest non J
+	not(caseTestOld(X,Y,J)). %Jusqu'à la caseTestOld non J
 droiteTestHaut(X,Y,J,R,Rg,Pg,Ag) :-
 	incr(Y,Y1),
 	incr(X,X1),
@@ -439,7 +439,7 @@ gagneTestDirectLigne(X,Y,J) :-
 gaucheVerif(X,Y,J,Rg):-
 	gauche(X,Y,J,0,Rg).
 gauche(X,Y,J,R,R) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la case non J
+	not(caseTestOld(X,Y,J)). %Jusqu'à la case non J
 gauche(X,Y,J,R,Rg) :-
 	decr(X,X1),
 	incr(R,R1),
@@ -448,7 +448,7 @@ gauche(X,Y,J,R,Rg) :-
 droiteVerif(X,Y,J,Rg):-
 	droite(X,Y,J,0,Rg).
 droite(X,Y,J,R,R) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la case non J
+	not(caseTestOld(X,Y,J)). %Jusqu'à la case non J
 droite(X,Y,J,R,Rg) :-
 	incr(X,X1),
 	incr(R,R1),
@@ -470,7 +470,7 @@ gagneTestDirectDiag1(X,Y,J) :-
 gaucheHautVerif(X,Y,J,Rg):-
 	gaucheHaut(X,Y,J,0,Rg).
 gaucheHaut(X,Y,J,R,R) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la case non J
+	not(caseTestOld(X,Y,J)). %Jusqu'à la case non J
 gaucheHaut(X,Y,J,R,Rg) :-
 	incr(Y,Y1),
 	decr(X,X1),
@@ -480,7 +480,7 @@ gaucheHaut(X,Y,J,R,Rg) :-
 droiteBasVerif(X,Y,J,Rg):-
 	droiteBas(X,Y,J,0,Rg).
 droiteBas(X,Y,J,R,R) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la case non J
+	not(caseTestOld(X,Y,J)). %Jusqu'à la case non J
 droiteBas(X,Y,J,R,Rg) :-
 	decr(Y,Y1),
 	incr(X,X1),
@@ -503,7 +503,7 @@ gagneTestDirectDiag2(X,Y,J) :-
 gaucheBasVerif(X,Y,J,Rg) :-
 	gaucheBas(X,Y,J,0,Rg).
 gaucheBas(X,Y,J,R,R) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la case non J
+	not(caseTestOld(X,Y,J)). %Jusqu'à la case non J
 gaucheBas(X,Y,J,R,Rg) :-
 	decr(Y,Y1),
 	decr(X,X1),
@@ -513,7 +513,7 @@ gaucheBas(X,Y,J,R,Rg) :-
 droiteHautVerif(X,Y,J,Rg) :-
 	droiteHaut(X,Y,J,0,Rg).
 droiteHaut(X,Y,J,R,R) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la case non J
+	not(caseTestOld(X,Y,J)). %Jusqu'à la case non J
 droiteHaut(X,Y,J,R,Rg) :-
 	incr(Y,Y1),
 	incr(X,X1),
@@ -524,12 +524,12 @@ droiteHaut(X,Y,J,R,Rg) :-
 
 gagneTestDirectColonne(X,Y,J) :-
     decr(Y,Y1),
-    caseTest(X,Y1,J),
+    caseTestOld(X,Y1,J),
     decr(Y1,Y2),
-    caseTest(X,Y2,J),
+    caseTestOld(X,Y2,J),
     decr(Y2,Y3),
-    caseTest(X,Y3,J).
+    caseTestOld(X,Y3,J).
 
-%%%%%%% caseVideTest %%%%%
+%%%%%%% caseVideTestOld %%%%%
 
-caseVideTest(X,Y) :- nonvar(X),nonvar(Y),not(caseTest(X,Y,_)).
+caseVideTestOld(X,Y) :- nonvar(X),nonvar(Y),not(caseTestOld(X,Y,_)).

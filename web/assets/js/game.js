@@ -31,6 +31,9 @@ function addMsg(msg, type, hoverInOut){
 	var $playsbox = $("#plays-box");
 	var $lastMsgBox = $("#last-msg-box");
 	var $msg = $("<li></li>").addClass("list-group-item list-group-item-"+type).text(msg);
+	if (type == "win") {
+		$msg.attr("id","win-message")
+	}
 	var $msgClone = $msg.clone();
 	if(	(type === "jaune" || type === "rouge")
 		&& typeof hoverInOut !== 'undefined'){
@@ -90,6 +93,7 @@ var Game = {
 			var playerId = playersList[i][0];
 			var playerName = playersList[i][1];
 			var $selectableElement = $("<p></p>")
+				.attr("id", playerId)
 				.attr("data-id", playerId)
 				.attr("data-name", playerName)
 				.addClass("selectable player")

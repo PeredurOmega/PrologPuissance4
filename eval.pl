@@ -1,7 +1,7 @@
 ﻿%%%%%%%%%%%% eval.pl %%%%%%%%%%%%
 % Différentes fonctions d'évaluation pour le Puissance 4, toutes basées sur des heuristiques différentes.
 
-:- module(eval, [evalTest1/2, evalPosition/3, caseVideTest/2, evalJeu/2]).
+:- module(eval, [caseVideTest/2, evalJeu/2]).
 
 %%%%%%%%%%%%%%%%
 %% Inclusions %%
@@ -15,162 +15,7 @@
 :- use_module(library(random)).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%
-%% Prédicats publics %%
-%%%%%%%%%%%%%%%%%%%%%%%
-
-% evalJeu/5(+JoueurCourant, +AutreJoueur, +X, +Y, -Score)
-% Évalue la situation courante pour le joueur JoueurCourant étant donné que le dernier coup joué fut joué en (X,Y). Le score est pondéré par les différentes pondérations données en entrée (par assert) à evalJeu. Le score est ensuite perturbé par une valeur aléatoire, permettant de casser le caractère déterministe de l'IA.
-% Score s'unifie avec le score évalué pour la position courante.
-% evalJeu(JoueurCourant,AutreJoueur,X,Y,Score) :-
-% 	assert(caseTest(X,Y,JoueurCourant)),
-% 	assert(ennemiTest(AutreJoueur)),
-% 	poidsPuissance3(PoidsPuissance3), poidsPosition(PoidsPosition), poidsDensite(PoidsDensite), poidsAdjacence(PoidsAdjacence),
-% 	evalPosition(JoueurCourant,Score1,PoidsPosition),
-% 	evalPuissances3(JoueurCourant,AutreJoueur,Score2,PoidsPuissance3),
-% 	densite(JoueurCourant,Score3,PoidsDensite),
-% 	evalAdjacence(X,Y,_,Score4, PoidsAdjacence),
-% 	retract(caseTest(X,Y,JoueurCourant)),
-% 	retract(ennemiTest(AutreJoueur)),
-% 	random_between(-2,2,Perturbation),
-% 	Score is Score1 * PoidsPosition
-% 			+ Score2 * PoidsPuissance3
-% 			+ Score3
-% 			+ Score4
-% 			+ Perturbation.
-
-%%%%%%%%%%%%%%%%%%%%%%
-%% Prédicats privés %%
-%%%%%%%%%%%%%%%%%%%%%%
-
-% evalPosition/3(+Courant,-Score,+PoidsPosition)
-% Évalue en privilégiant les positions centrales en fonction de la pondération.
-% Score s'unifie à une valeur entre -400 et 400.
-evalPosition(Courant,Score,PoidsPosition) :-
-	PoidsPosition>0,
-	assert(nbCasesPleines(0)),
-	findall(S, evalCases(Courant,S), Scores),
-	sum(Scores, ScoreTot),
-	nbCasesPleines(NbCasesPleinesFinal),
-	retract(nbCasesPleines(NbCasesPleinesFinal)),
-	Score is ScoreTot / (NbCasesPleinesFinal+1).
-evalPosition(_,0,_).
-
-evalCases(Courant,ScoreCase) :-
-	caseTest(X,Y,_),
-	nbCasesPleines(NbCasesPleines),
-	retract(nbCasesPleines(NbCasesPleines)),
-	incr(NbCasesPleines,NbCasesPleinesF),
-	assert(nbCasesPleines(NbCasesPleinesF)),
-	evalCase(X,Y,Courant,ScoreCase).
-
-% renvoie un score entre -400 et 400
-evalCase(X,Y,Courant,ScoreCase) :-
-	nbColonnes(NBCOLONNES),
-	nbLignes(NBLIGNES),
-	CentreX is NBCOLONNES // 2 + 1,
-	CentreY is NBLIGNES // 2 + 1,
-	Dx is X - CentreX,
-	Dy is Y - CentreY,
-	abs(Dx,AbsX),
-	abs(Dy,AbsY),
-	ScoreCase is ( 200/(AbsX+1) + 200/(AbsY+1) ).
-
-ponderationJ(X,Y, Courant,1) :-
-	caseTest(X,Y,Courant), !.
-ponderationJ(X,Y,_,-1) :-
-	ennemiTest(J),
-	caseTest(X,Y,J), !.
-ponderationJ(_,_,_,0).
-
-%%%%%%%%%%%%%%%%%%%%
-
-% evalPuissances3/3(+JoueurCourant,+AutreJoueur,-Score)
-% Évalue en cherchant les positions faisant gagner.
-% ScoreFinal s'unifie au score de la position.
-evalPuissances3(JoueurCourant,AutreJoueur,ScoreFinal,PoidsPuissance3) :-
-	PoidsPuissance3>0,
-	findall(S,evalCasesVides(JoueurCourant,S),ScoresCourant), sum(ScoresCourant,ScoreCourant),
-	findall(S,evalCasesVides(AutreJoueur,S),ScoresAutre), sum(ScoresAutre,ScoreAutre),
-	ScoreFinal is ScoreCourant - ScoreAutre.
-evalPuissances3(_,_,0,_).
-
-evalCasesVides(Joueur,ScoreCase) :-
-	nbColonnes(NBCOLONNES), nbLignes(NBLIGNES),
-	between(1,NBCOLONNES,X), between(1,NBLIGNES,Y),
-	caseTest(X,Y,Joueur),
-	incr(X,X1),
-	decr(X,X2),
-	incr(Y,Y1),
-	decr(Y,Y2),
-	caseVideTest(X1,Y1),
-	caseVideTest(X2,Y1),
-	caseTest(X2,Y2,_),
-	caseTest(X1,Y2,_),
-	(gagneTestDirect(X1,Y1,Joueur) -> ScoreCase1=100 ; ScoreCase1=0),
-	(gagneTestDirect(X2,Y1,Joueur) -> ScoreCase2=100 ; ScoreCase2=0),
-	ScoreCase is ScoreCase1+ScoreCase2.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%			HEURISTIQUE PAR ADJACENCE
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% evalAdjacence/5(+X,+Y,+Joueur,-Note,+PoidsAdjacence)
-% Donne une note d'autant plus forte qu'un pion est entouré de pions amis.
-% Note s'unifie au score de la position.
-
-evalAdjacence(X,Y,Joueur,Note,PoidsAdjacence) :-
-	PoidsAdjacence>0,
-	aggregate_all(count,caseAdjacente(X,Y,Joueur,_,_),N),
-	pow(N,2,Note).
-evalAdjacence(_,_,_,0,_).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%			HEURISTIQUE PAR DENSITE DE PION
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% densite/3(+Joueur,-Note,+PoidsDensite)
-% Donne une note d'autant plus élevée que les pions sont groupés.
-% Note s'unifie au score de la position.
-densite(J,Note,PoidsDensite) :- PoidsDensite>0, Z is 1, calculNbPoints(J,Z,Note).
-densite(_,0,_).
-calculNbPoints(_,Z,Note) :- Z>6, Note is 0.
-calculNbPoints(J,Z,Note) :- nbPointsZone(J,Z,N), incr(Z,ZP), calculNbPoints(J,ZP,NP), Note is N+NP.
-nbPointsZone(J,Z,NbPoints) :- nbPionsZone(J,Z,N), pow(N,2,NbPoints).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% nbPionsZone/3(+Joueur,+Zone,-NbPions)
-% Donne le nombre de pions contenu dans une zone.
-% NbPions s'unifie au nombre de pions contenu dans une zone.
-nbPionsZone(J,Z,NbPions) :-
-	aggregate_all(count,caseTestZone(Z,J,_,_),NbPions).
-
-caseTestZone(Zone,Joueur,X,Y) :- caseTest(X,Y,Joueur), zone(Zone,X,Y).
-zone(1,X,Y) :- X =<3, Y =< 3.
-zone(2,X,Y) :- X = 4, Y =< 3.
-zone(3,X,Y) :- X > 4, Y =< 3.
-zone(4,X,Y) :- X > 4, Y > 3.
-zone(5,X,Y) :- X = 4, Y > 3.
-zone(6,X,Y) :- X =<3, Y > 3.
-
-%%%%%%% caseVideTest %%%%%
-% caseVideTest(+X,+Y)
-% vrai si la case X,Y est vide
 caseVideTest(X,Y) :- nonvar(X),nonvar(Y),not(caseTest(X,Y,_)).
-
-
-%%%% Utilisé pour les tests unitaires
-
-evalTest1(1,-3).
-evalTest1(2,-4).
-evalTest1(3,5).
-evalTest1(4,10).
-evalTest1(5,9).
-evalTest1(6,-5).
-evalTest1(7,8).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Nouvelles Evaluations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -284,12 +129,12 @@ evalCasesBlocage(Courant,ScoreCase) :-
 	
 evalPosition(Courant,Score,PoidsPosition) :-
 	PoidsPosition>0,
-	findall(S, evalCases(Courant,S), Scores),
+	findall(S, evalCasesPosition(Courant,S), Scores),
 	sum(Scores, ScoreTot),
 	Score is ScoreTot.
 evalPosition(_,0,_).
 
-evalCases(Courant,ScoreCase) :-
+evalCasesPosition(Courant,ScoreCase) :-
 	caseTest(X,Y,Couleur),
 	evalCaseNew(X,Y,Courant,Couleur,ScoreCase).
 

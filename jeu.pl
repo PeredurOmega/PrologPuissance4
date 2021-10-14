@@ -36,12 +36,12 @@
 % Définition des différentes IA.
 typeJoueur(1,'Humain').
 typeJoueur(2,'IA Aléatoire').
-typeJoueur(3,'IA Minimax 3 - eval Position').
-typeJoueur(4,'IA Minimax 3 - eval Position+Puissance3').
-typeJoueur(5,'IA Minimax 4 - eval Position').
-typeJoueur(6,'IA Minimax 4 - eval Position+Puissance3').
-typeJoueur(7,'IA Minimax 5 - eval Position').
-typeJoueur(8,'IA Minimax 5 - eval Position+Puissance3').
+typeJoueur(3,'IA Minimax 4 - eval Perso').
+typeJoueur(4,'IA Minimax 5 - eval Perso').
+typeJoueur(5,'IA Minimax 6 - eval Perso').
+typeJoueur(6,'IA Minimax old 4 - eval Old').
+typeJoueur(7,'IA Minimax old 5 - eval Old').
+typeJoueur(8,'IA Minimax old 6 - eval Old').
 
 changerJoueur :-
 	joueurCourant(rouge,TypeJoueurR),
