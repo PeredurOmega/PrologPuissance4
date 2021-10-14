@@ -169,16 +169,17 @@ obtenirCoup(_,2,Coup) :-
 obtenirCoup(CouleurJCourant,3,Coup) :-
     % iaMinimax(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsPuissance3,PoidsDensite,PoidsAdjacence)
     %iaMinimax(CouleurJCourant,Coup,3,1,0,0,0).
-    iaAlphabeta(CouleurJCourant,Coup,5,1,0,0,0).
+    %iaAlphabeta(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsAlignement,PoidsPuissance3,PoidsDensite,PoidsAdjacence)
+    iaAlphabeta(CouleurJCourant,Coup,5,1,1,0,0,0).
 obtenirCoup(CouleurJCourant,4,Coup) :-
-    iaMinimax(CouleurJCourant,Coup,3,1,0,0,0).
+    iaMinimax(CouleurJCourant,Coup,3,1,0,0,0,0).
 obtenirCoup(CouleurJCourant,5,Coup) :-
-    iaMinimax(CouleurJCourant,Coup,4,1,0,0,0).
+    iaMinimax(CouleurJCourant,Coup,4,1,0,0,0,0).
 obtenirCoup(CouleurJCourant,6,Coup) :-
-    iaMinimax(CouleurJCourant,Coup,4,1,1,0,0).
+    iaMinimax(CouleurJCourant,Coup,4,1,1,0,0,0).
 obtenirCoup(CouleurJCourant,7,Coup) :-
-    iaMinimax(CouleurJCourant,Coup,5,1,1,0,0).
+    iaMinimax(CouleurJCourant,Coup,5,1,1,0,0,0).
 obtenirCoup(CouleurJCourant,8,Coup) :-
-    iaMinimax(CouleurJCourant,Coup,5,1,1,0,0).
+    iaMinimax(CouleurJCourant,Coup,5,1,1,0,0,0).
 
 

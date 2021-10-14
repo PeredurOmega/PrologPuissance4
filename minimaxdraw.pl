@@ -140,5 +140,5 @@ undo_move(Move, Color) :-
 	retract(caseTest(Move, LinePos, Color)).
 
 value(InitPlayer, V) :-
-	evalPosition(InitPlayer,Score1,1),
-	V is Score1 * 1.
+	evalJeu(InitPlayer,Score),
+	V is Score.
