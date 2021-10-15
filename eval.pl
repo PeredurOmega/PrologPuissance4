@@ -11,6 +11,7 @@
 :- use_module(jeu).
 :- use_module(ia).
 :- use_module(minimaxdraw).
+:- use_module(evalNew).
 
 :- use_module(library(random)).
 
@@ -67,6 +68,68 @@ caseTableauAlignements(5,6,5).
 caseTableauAlignements(6,6,4).
 caseTableauAlignements(7,6,3).
 
+evalJeu(Courant,Score) :-
+	poidsPosition(PoidsPosition),
+	poidsAlignement(PoidsAlignement),
+	poidsBlocage(PoidsBlocage),
+	evalPosition(Courant,ScorePosition,PoidsPosition),
+	evalNbAlignements(Courant,ScoreAlignement,PoidsAlignement),
+	evalBlocage(Courant,ScoreBlocage,PoidsBlocage),
+	% evalAlignements3New(Courant,ScoreAlignement,PoidsAlignement),
+	% evalBlocage3New(Courant,ScoreBlocage,PoidsBlocage),
+	Score is ScorePosition * PoidsPosition 
+		+ ScoreAlignement * PoidsAlignement
+		+ ScoreBlocage * PoidsBlocage.
+
+	
+evalPosition(Courant,Score,PoidsPosition) :-
+	PoidsPosition>0,
+	findall(S, evalCasesPosition(Courant,S), Scores),
+	sum(Scores, ScoreTot),
+	Score is ScoreTot.
+evalPosition(_,0,_).
+
+evalCasesPosition(Courant,ScoreCase) :-
+	caseTest(X,Y,Couleur),
+	evalCaseNew(X,Y,Courant,Couleur,ScoreCase).
+
+evalCaseNew(X,Y,Courant,Couleur,ScoreCase) :-
+	Couleur == Courant,
+	caseTableauAlignements(X,Y,Poids),
+	ScoreCase is Poids.
+
+evalCaseNew(X,Y,Courant,Couleur,ScoreCase) :-
+	Couleur \== Courant,
+	caseTableauAlignements(X,Y,Poids),
+	ScoreCase is Poids * -1.
+
+
+evalNbAlignements(Courant,Score,PoidsAlignement) :-
+	PoidsAlignement>0,
+	findall(S, evalCasesAlignements(Courant,S), Scores),
+	sum(Scores, ScoreTot),
+	Score is ScoreTot.
+evalNbAlignements(_,0,_).
+
+evalCasesAlignements(Courant,ScoreCase) :-
+	caseTest(X,Y,Courant),
+	calculPoidsAlignements(X,Y,Courant,ScoreCase).
+
+
+evalBlocage(Courant,Score,PoidsBlocage) :-
+	PoidsBlocage>0,
+	findall(S, evalCasesBlocage(Courant,S), Scores),
+	sum(Scores, ScoreTot),
+	Score is ScoreTot.
+evalBlocage(_,0,_).
+
+evalCasesBlocage(Courant,ScoreCase) :-
+	ennemi(Courant,AutreJoueur),
+	caseTest(X,Y,AutreJoueur),
+	calculPoidsAlignements(X,Y,AutreJoueur,Score),
+	ScoreCase is Score * -1.
+
+
 calculPoidsAlignements(X,Y,J,Score) :-
 	gagneTestDirectLigne(X,Y,J,RfLignes),
 	gagneTestDirectDiag1(X,Y,J,RfDiag1),
@@ -90,64 +153,6 @@ scoreAlignement(NbAlignes,Score) :-
 scoreAlignement(NbAlignes,Score) :-
 	NbAlignes == 4,
 	Score is 1000.
-
-evalJeu(Courant,Score) :-
-	poidsPosition(PoidsPosition),
-	poidsAlignement(PoidsAlignement),
-	poidsBlocage(PoidsBlocage),
-	evalPosition(Courant,ScorePosition,PoidsPosition),
-	evalNbAlignements(Courant,ScoreAlignement,PoidsAlignement),
-	evalBlocage(Courant,ScoreBlocage,PoidsBlocage),
-	Score is ScorePosition * PoidsPosition 
-		+ ScoreAlignement * PoidsAlignement
-		+ ScoreBlocage * PoidsBlocage.
-
-
-evalNbAlignements(Courant,Score,PoidsAlignement) :-
-	PoidsAlignement>0,
-	findall(S, evalCasesAlignements(Courant,S), Scores),
-	sum(Scores, ScoreTot),
-	Score is ScoreTot.
-evalNbAlignements(_,0,_).
-
-evalCasesAlignements(Courant,ScoreCase) :-
-	caseTest(X,Y,Courant),
-	calculPoidsAlignements(X,Y,Courant,ScoreCase).
-
-evalBlocage(Courant,Score,PoidsBlocage) :-
-	PoidsBlocage>0,
-	findall(S, evalCasesBlocage(Courant,S), Scores),
-	sum(Scores, ScoreTot),
-	Score is ScoreTot.
-evalBlocage(_,0,_).
-
-evalCasesBlocage(Courant,ScoreCase) :-
-	ennemi(Courant,AutreJoueur),
-	caseTest(X,Y,AutreJoueur),
-	calculPoidsAlignements(X,Y,AutreJoueur,Score),
-	ScoreCase is Score * -1.
-	
-evalPosition(Courant,Score,PoidsPosition) :-
-	PoidsPosition>0,
-	findall(S, evalCasesPosition(Courant,S), Scores),
-	sum(Scores, ScoreTot),
-	Score is ScoreTot.
-evalPosition(_,0,_).
-
-evalCasesPosition(Courant,ScoreCase) :-
-	caseTest(X,Y,Couleur),
-	evalCaseNew(X,Y,Courant,Couleur,ScoreCase).
-
-evalCaseNew(X,Y,Courant,Couleur,ScoreCase) :-
-	Couleur == Courant,
-	caseTableauAlignements(X,Y,Poids),
-	ScoreCase is Poids.
-
-evalCaseNew(X,Y,Courant,Couleur,ScoreCase) :-
-	Couleur \== Courant,
-	caseTableauAlignements(X,Y,Poids),
-	ScoreCase is Poids * -1.
-
 
 %%% En ligne %%%
 
