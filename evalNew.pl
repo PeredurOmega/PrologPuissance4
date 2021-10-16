@@ -114,13 +114,16 @@ gaucheVerif(X,Y,J,Rg,H,P):-
 	gauche(X,Y,J,0,Rg,H,P).
 gauche(X,Y,J,R,R,H,P):-
 	not(caseTest(X,Y,J)), %Jusqu'à la case non J
-	H = 0, P = 0,
 	ennemi(J,EJ),
 	X>0, not(caseTest(X,Y,EJ)),
 	H = 1,
 	decr(X,X1),
-	caseTest(X1,Y,J),
-	P = 1.
+	(caseTest(X1,Y,J) -> P=1;P=0).
+gauche(X,Y,J,R,R,H,P):-
+	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	ennemi(J,EJ),
+	(X=<0;caseTest(X,Y,EJ)),
+	H = 0, P = 0.
 gauche(X,Y,J,R,Rg,_,_) :-
 	decr(X,X1),
 	incr(R,R1),
@@ -130,13 +133,16 @@ droiteVerif(X,Y,J,Rg,H,P):-
 	droite(X,Y,J,0,Rg,H,P).
 droite(X,Y,J,R,R,H,P) :-
 	not(caseTest(X,Y,J)), %Jusqu'à la case non J
-	H = 0, P = 0,
 	ennemi(J,EJ),
 	X<8, not(caseTest(X,Y,EJ)),
 	H = 1,
 	incr(X,X1),
-	caseTest(X1,Y,J),
-	P = 1.
+	(caseTest(X1,Y,J) -> P=1;P=0).
+droite(X,Y,J,R,R,H,P) :-
+	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	ennemi(J,EJ),
+	(X>=8; caseTest(X,Y,EJ)),
+	H = 0, P = 0.
 droite(X,Y,J,R,Rg,_,_) :-
 	incr(X,X1),
 	incr(R,R1),
@@ -155,13 +161,16 @@ basVerif(X,Y,J,Rb,H,P):-
 	bas(X,Y,J,0,Rb,H,P).
 bas(X,Y,J,R,R,H,P) :-
 	not(caseTest(X,Y,J)), %Jusqu'à la case non J
-	H = 0, P = 0,
 	ennemi(J,EJ),
 	Y>0, not(caseTest(X,Y,EJ)),
 	H = 1,
 	decr(Y,Y1),
-	caseTest(X,Y1,J),
-	P = 1.
+	(caseTest(X,Y1,J) -> P=1;P=0).
+bas(X,Y,J,R,R,H,P) :-
+	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	ennemi(J,EJ),
+	(Y=<0; caseTest(X,Y,EJ)),
+	H = 0, P = 0.
 bas(X,Y,J,R,Rb,_,_) :-
 	decr(Y,Y1),
 	incr(R,R1),
@@ -171,13 +180,16 @@ hautVerif(X,Y,J,Rh,H,P):-
 	haut(X,Y,J,0,Rh,H,P).
 haut(X,Y,J,R,R,H,P) :-
 	not(caseTest(X,Y,J)), %Jusqu'à la case non J
-	H = 0, P = 0,
 	ennemi(J,EJ),
 	Y<7, not(caseTest(X,Y,EJ)),
 	H = 1,
 	incr(Y,Y1),
-	caseTest(X,Y1,J),
-	P = 1.
+	(caseTest(X,Y1,J) -> P=1;P=0).
+haut(X,Y,J,R,R,H,P) :-
+	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	ennemi(J,EJ),
+	(Y>=7; caseTest(X,Y,EJ)),
+	H = 0, P = 0.
 haut(X,Y,J,R,Rh,_,_) :-
 	incr(Y,Y1),
 	incr(R,R1),
@@ -201,14 +213,17 @@ gaucheHautVerif(X,Y,J,Rg,H,P):-
 	gaucheHaut(X,Y,J,0,Rg,H,P).
 gaucheHaut(X,Y,J,R,R,H,P) :-
 	not(caseTest(X,Y,J)), %Jusqu'à la case non J
-	H = 0, P = 0,
 	ennemi(J,EJ),
 	X>0, Y<7, not(caseTest(X,Y,EJ)),
 	H = 1,
 	incr(Y,Y1),
 	decr(X,X1),
-	caseTest(X1,Y1,J),
-	P = 1.
+	(caseTest(X1,Y1,J) -> P=1;P=0).
+gaucheHaut(X,Y,J,R,R,H,P) :-
+	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	ennemi(J,EJ),
+	(X=<0;Y>=7;caseTest(X,Y,EJ)),
+	H = 0, P = 0.
 gaucheHaut(X,Y,J,R,Rg,_,_) :-
 	incr(Y,Y1),
 	decr(X,X1),
@@ -219,14 +234,17 @@ droiteBasVerif(X,Y,J,Rg,H,P):-
 	droiteBas(X,Y,J,0,Rg,H,P).
 droiteBas(X,Y,J,R,R,H,P) :-
 	not(caseTest(X,Y,J)), %Jusqu'à la case non J
-	H = 0, P = 0,
 	ennemi(J,EJ),
 	X<8, Y>0, not(caseTest(X,Y,EJ)),
 	H = 1,
 	decr(Y,Y1),
 	incr(X,X1),
-	caseTest(X1,Y1,J),
-	P = 1.
+	(caseTest(X1,Y1,J) -> P=1;P=0).
+droiteBas(X,Y,J,R,R,H,P) :-
+	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	ennemi(J,EJ),
+	(X>=8;Y=<0;caseTest(X,Y,EJ)),
+	H = 0, P = 0.
 droiteBas(X,Y,J,R,Rg,_,_) :-
 	decr(Y,Y1),
 	incr(X,X1),
@@ -248,14 +266,17 @@ gaucheBasVerif(X,Y,J,Rg,H,P) :-
 	gaucheBas(X,Y,J,0,Rg,H,P).
 gaucheBas(X,Y,J,R,R,H,P) :-
 	not(caseTest(X,Y,J)), %Jusqu'à la case non J
-	H = 0, P = 0,
 	ennemi(J,EJ),
 	X>0, Y>0, not(caseTest(X,Y,EJ)),
 	H = 1,
 	decr(Y,Y1),
 	decr(X,X1),
-	caseTest(X1,Y1,J),
-	P = 1.
+	(caseTest(X1,Y1,J) -> P=1;P=0).
+gaucheBas(X,Y,J,R,R,H,P) :-
+	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	ennemi(J,EJ),
+	(X=<0;Y=<0;caseTest(X,Y,EJ)),
+	H = 0, P = 0.
 gaucheBas(X,Y,J,R,Rg,_,_) :-
 	decr(Y,Y1),
 	decr(X,X1),
@@ -266,14 +287,17 @@ droiteHautVerif(X,Y,J,Rg,H,P) :-
 	droiteHaut(X,Y,J,0,Rg,H,P).
 droiteHaut(X,Y,J,R,R,H,P) :-
 	not(caseTest(X,Y,J)), %Jusqu'à la case non J
-	H = 0, P = 0,
 	ennemi(J,EJ),
 	X<8, Y<7, not(caseTest(X,Y,EJ)),
 	H = 1,
 	incr(Y,Y1),
 	incr(X,X1),
-	caseTest(X1,Y1,J),
-	P = 1.
+	(caseTest(X1,Y1,J) -> P=1;P=0).
+droiteHaut(X,Y,J,R,R,H,P) :-
+	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	ennemi(J,EJ),
+	(X>=8;Y>=7;caseTest(X,Y,EJ)),
+	H = 0, P = 0.
 droiteHaut(X,Y,J,R,Rg,_,_) :-
 	incr(Y,Y1),
 	incr(X,X1),
