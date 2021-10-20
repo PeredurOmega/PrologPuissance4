@@ -1,5 +1,7 @@
-﻿%%%%%%%%%%%% eval.pl %%%%%%%%%%%%
-% Différentes fonctions d'évaluation pour le Puissance 4, toutes basées sur des heuristiques différentes.
+﻿%%%%%%%%%%%% evalNew.pl %%%%%%%%%%%%
+% Fonctions d'évaluation pour le Puissance 4
+% Heuristique sur le positionnement des pions dans le plateau
+% Heuristique sur l'alignement des pions en vérifiant que l'on peut compléter celui-ci
 
 :- module(evalNew, [evalAlignements3New/3, evalBlocage3New/3]).
 
@@ -18,7 +20,7 @@
 caseVideTestNew(X,Y) :- nonvar(X),nonvar(Y),not(caseTest(X,Y,_)).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Nouvelles Evaluations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Nouvelles Evaluations sur l'alignement %%%
 
 
 evalAlignements3New(Courant,Score,PoidsAlignement) :-
@@ -26,30 +28,24 @@ evalAlignements3New(Courant,Score,PoidsAlignement) :-
 	findall(S, evalCasesAlignements(Courant,S), Scores),
 	sum(Scores, ScoreTot),
 	Score is ScoreTot.
-evalNbAlignements(_,0,_).
+evalAlignements3New(_,0,_).
 
 evalCasesAlignements(Courant,ScoreCase) :-
 	caseTest(X,Y,Courant),
 	calculPoidsAlignements(X,Y,Courant,ScoreCase).
-
-
 
 evalBlocage3New(Courant,Score,PoidsBlocage) :-
 	PoidsBlocage>0,
 	findall(S, evalCasesBlocage(Courant,S), Scores),
 	sum(Scores, ScoreTot),
 	Score is ScoreTot.
-evalBlocage(_,0,_).
+evalBlocage3New(_,0,_).
 
 evalCasesBlocage(Courant,ScoreCase) :-
 	ennemi(Courant,AutreJoueur),
 	caseTest(X,Y,AutreJoueur),
 	calculPoidsAlignements(X,Y,AutreJoueur,Score),
 	ScoreCase is Score * -1.
-	
-
-
-
 
 calculPoidsAlignements(X,Y,J,Score) :-
 	gagneTestDirectLigne(X,Y,J,RgL,RdL,HgL,HdL,PgL,PdL),
@@ -61,7 +57,6 @@ calculPoidsAlignements(X,Y,J,Score) :-
 	scoreWin(RgD1,RdD1,HgD1,HdD1,PgD1,PdD1,ScoreDiag1),
 	scoreWin(RgD2,RdLD2,HgD2,HdD2,PgD2,PdD2,ScoreDiag2),
 	Score is ScoreLignes + ScoreColonnes + ScoreDiag1 + ScoreDiag2.
-
 
 scoreWin(Rg,Rd,Hg,Hd,Pg,Pd,Score) :-
 	findall(S, scoreWin3(Rg,Rd,Hg,Hd,Pg,Pd,S),ScoreList),
@@ -102,7 +97,6 @@ scoreWin3(_,_,_,_,_,_,Score):-
 %Pg/Pd pion placé dans la case après le trou après le pion le plus à gauche/droite : 0 = faux, 1 = vrai%
 
 %%% En ligne %%%
-
 gagneTestDirectLigne(X,Y,J,Rg,Rd,Hg,Hd,Pg,Pd) :-
 	decr(X,X1),
 	gaucheVerif(X1,Y,J,Rg,Hg,Pg),
@@ -113,14 +107,14 @@ gagneTestDirectLigne(X,Y,J,Rg,Rd,Hg,Hd,Pg,Pd) :-
 gaucheVerif(X,Y,J,Rg,H,P):-
 	gauche(X,Y,J,0,Rg,H,P).
 gauche(X,Y,J,R,R,H,P):-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)), 
 	ennemi(J,EJ),
 	X>0, not(caseTest(X,Y,EJ)),
 	H = 1,
 	decr(X,X1),
 	(caseTest(X1,Y,J) -> P=1;P=0).
 gauche(X,Y,J,R,R,H,P):-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)), 
 	ennemi(J,EJ),
 	(X=<0;caseTest(X,Y,EJ)),
 	H = 0, P = 0.
@@ -132,14 +126,14 @@ gauche(X,Y,J,R,Rg,_,_) :-
 droiteVerif(X,Y,J,Rg,H,P):-
 	droite(X,Y,J,0,Rg,H,P).
 droite(X,Y,J,R,R,H,P) :-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)), 
 	ennemi(J,EJ),
 	X<8, not(caseTest(X,Y,EJ)),
 	H = 1,
 	incr(X,X1),
 	(caseTest(X1,Y,J) -> P=1;P=0).
 droite(X,Y,J,R,R,H,P) :-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)), 
 	ennemi(J,EJ),
 	(X>=8; caseTest(X,Y,EJ)),
 	H = 0, P = 0.
@@ -148,8 +142,7 @@ droite(X,Y,J,R,Rg,_,_) :-
 	incr(R,R1),
 	droite(X1,Y,J,R1,Rg,0,0).
 
-% en colonne %
-
+%%% En Colonne %%%
 gagneTestDirectColonne(X,Y,J,Rb,Rh,Hb,Hh,Pb,Ph) :-
 	decr(Y,Y1),
 	basVerif(X,Y1,J,Rb,Hb,Pb),
@@ -160,14 +153,14 @@ gagneTestDirectColonne(X,Y,J,Rb,Rh,Hb,Hh,Pb,Ph) :-
 basVerif(X,Y,J,Rb,H,P):-
 	bas(X,Y,J,0,Rb,H,P).
 bas(X,Y,J,R,R,H,P) :-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)), 
 	ennemi(J,EJ),
 	Y>0, not(caseTest(X,Y,EJ)),
 	H = 1,
 	decr(Y,Y1),
 	(caseTest(X,Y1,J) -> P=1;P=0).
 bas(X,Y,J,R,R,H,P) :-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)), 
 	ennemi(J,EJ),
 	(Y=<0; caseTest(X,Y,EJ)),
 	H = 0, P = 0.
@@ -179,14 +172,14 @@ bas(X,Y,J,R,Rb,_,_) :-
 hautVerif(X,Y,J,Rh,H,P):-
 	haut(X,Y,J,0,Rh,H,P).
 haut(X,Y,J,R,R,H,P) :-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)), 
 	ennemi(J,EJ),
 	Y<7, not(caseTest(X,Y,EJ)),
 	H = 1,
 	incr(Y,Y1),
 	(caseTest(X,Y1,J) -> P=1;P=0).
 haut(X,Y,J,R,R,H,P) :-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)), 
 	ennemi(J,EJ),
 	(Y>=7; caseTest(X,Y,EJ)),
 	H = 0, P = 0.
@@ -197,9 +190,6 @@ haut(X,Y,J,R,Rh,_,_) :-
 
 
 %%% En diagonale \ %%%
-
-
-
 gagneTestDirectDiag1(X,Y,J,Rg,Rd,Hg,Hd,Pg,Pd) :-
 	decr(X,X1),
 	incr(Y,Y1),
@@ -212,7 +202,7 @@ gagneTestDirectDiag1(X,Y,J,Rg,Rd,Hg,Hd,Pg,Pd) :-
 gaucheHautVerif(X,Y,J,Rg,H,P):-
 	gaucheHaut(X,Y,J,0,Rg,H,P).
 gaucheHaut(X,Y,J,R,R,H,P) :-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)), 
 	ennemi(J,EJ),
 	X>0, Y<7, not(caseTest(X,Y,EJ)),
 	H = 1,
@@ -220,7 +210,7 @@ gaucheHaut(X,Y,J,R,R,H,P) :-
 	decr(X,X1),
 	(caseTest(X1,Y1,J) -> P=1;P=0).
 gaucheHaut(X,Y,J,R,R,H,P) :-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)),
 	ennemi(J,EJ),
 	(X=<0;Y>=7;caseTest(X,Y,EJ)),
 	H = 0, P = 0.
@@ -233,7 +223,7 @@ gaucheHaut(X,Y,J,R,Rg,_,_) :-
 droiteBasVerif(X,Y,J,Rg,H,P):-
 	droiteBas(X,Y,J,0,Rg,H,P).
 droiteBas(X,Y,J,R,R,H,P) :-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)), 
 	ennemi(J,EJ),
 	X<8, Y>0, not(caseTest(X,Y,EJ)),
 	H = 1,
@@ -241,7 +231,7 @@ droiteBas(X,Y,J,R,R,H,P) :-
 	incr(X,X1),
 	(caseTest(X1,Y1,J) -> P=1;P=0).
 droiteBas(X,Y,J,R,R,H,P) :-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)), 
 	ennemi(J,EJ),
 	(X>=8;Y=<0;caseTest(X,Y,EJ)),
 	H = 0, P = 0.
@@ -252,7 +242,6 @@ droiteBas(X,Y,J,R,Rg,_,_) :-
 	droiteBas(X1,Y1,J,R1,Rg,0,0).
 
 %%% En diagonale / %%%
-
 gagneTestDirectDiag2(X,Y,J,Rg,Rd,Hg,Hd,Pg,Pd) :-
 	decr(X,X1),
 	decr(Y,Y1),
@@ -265,7 +254,7 @@ gagneTestDirectDiag2(X,Y,J,Rg,Rd,Hg,Hd,Pg,Pd) :-
 gaucheBasVerif(X,Y,J,Rg,H,P) :-
 	gaucheBas(X,Y,J,0,Rg,H,P).
 gaucheBas(X,Y,J,R,R,H,P) :-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)), 
 	ennemi(J,EJ),
 	X>0, Y>0, not(caseTest(X,Y,EJ)),
 	H = 1,
@@ -273,7 +262,7 @@ gaucheBas(X,Y,J,R,R,H,P) :-
 	decr(X,X1),
 	(caseTest(X1,Y1,J) -> P=1;P=0).
 gaucheBas(X,Y,J,R,R,H,P) :-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)), 
 	ennemi(J,EJ),
 	(X=<0;Y=<0;caseTest(X,Y,EJ)),
 	H = 0, P = 0.
@@ -286,7 +275,7 @@ gaucheBas(X,Y,J,R,Rg,_,_) :-
 droiteHautVerif(X,Y,J,Rg,H,P) :-
 	droiteHaut(X,Y,J,0,Rg,H,P).
 droiteHaut(X,Y,J,R,R,H,P) :-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)), 
 	ennemi(J,EJ),
 	X<8, Y<7, not(caseTest(X,Y,EJ)),
 	H = 1,
@@ -294,7 +283,7 @@ droiteHaut(X,Y,J,R,R,H,P) :-
 	incr(X,X1),
 	(caseTest(X1,Y1,J) -> P=1;P=0).
 droiteHaut(X,Y,J,R,R,H,P) :-
-	not(caseTest(X,Y,J)), %Jusqu'à la case non J
+	not(caseTest(X,Y,J)), 
 	ennemi(J,EJ),
 	(X>=8;Y>=7;caseTest(X,Y,EJ)),
 	H = 0, P = 0.
@@ -303,5 +292,3 @@ droiteHaut(X,Y,J,R,Rg,_,_) :-
 	incr(X,X1),
 	incr(R,R1),
 	droiteHaut(X1,Y1,J,R1,Rg,0,0).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

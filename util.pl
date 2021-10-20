@@ -1,4 +1,5 @@
 ﻿%%%%%%%%%%%% util.pl %%%%%%%%%%%%
+% Ancien code basé sur la source : https://github.com/SIGSWAG/PrologPuissance4 %
 % Différents prédicats d'utilité publique.
 
 :- module(util, [

@@ -2,6 +2,8 @@
 %% DÉPRÉCIÉ %%
 %%%%%%%%%%%%%%
 
+%%% Ancien code basé sur la source : https://github.com/SIGSWAG/PrologPuissance4 %%%
+
 %%%%%%%%%%%% ihm.pl %%%%%%%%%%%%
 
 :- module(ihm, [afficher/0, demandeCoup/3, afficherGagnant/4, afficherPartieNulle/0, demandeTypeDeJeu/1]).

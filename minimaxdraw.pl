@@ -1,7 +1,14 @@
-:- module(minimaxdraw, [caseTest/3
-	,evaluate_and_choose/6,minimax/5,
-	evaluate_and_choose_ab/8, alpha_beta/7]
-).
+%%%%%%%%%%%% minimaxdraw.pl %%%%%%%%%%%%
+
+%%% Code implémentant les algorithmes minimax et élagage alpha beta 
+
+:- module(minimaxdraw, [
+	caseTest/3,
+	evaluate_and_choose/6,
+	minimax/5,
+	evaluate_and_choose_ab/8,
+ 	alpha_beta/7
+]).
 
 :- use_module(eval).
 :- use_module(jeu).
@@ -22,7 +29,7 @@ ponderate(MaxMin, Depth, Value, Value1) :-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     Alpha beta		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     Alpha beta     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 evaluate_and_choose_ab([Move|Moves], InitPlayer, Depth, Alpha, Beta, Record, BestMove, MaxMin) :-
@@ -31,11 +38,6 @@ evaluate_and_choose_ab([Move|Moves], InitPlayer, Depth, Alpha, Beta, Record, Bes
 	undo_move(Move, Color),
 	ponderate(MaxMin, Depth, Value, Value1),
 	cutoff(Move, Value1, Depth, Alpha, Beta , Moves ,InitPlayer, Record, BestMove, MaxMin).
-
-% evaluate_and_choose_ab([], InitPlayer, Depth, Alpha, Beta, Move, (Move, Alpha), MaxMin) :-
-% 	Move == nil,
-% 	alpha_beta(0,InitPlayer, Alpha, Beta, MoveX, Value, MaxMin),
-% 	cutoff(Move, Value1, Depth, Alpha, Beta , Moves ,InitPlayer, Record, BestMove, MaxMin).
 
 evaluate_and_choose_ab([], InitPlayer, Depth, Alpha, Beta, Move, (Move, Alpha), MaxMin).
 
@@ -79,7 +81,7 @@ cutoff(Move,Value,Depth,Alpha, Beta , Moves, InitPlayer, Move1,BestMove, MaxMin)
 	evaluate_and_choose_ab(Moves, InitPlayer, Depth, Alpha, Beta, Move1, BestMove, MaxMin).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    Min Max classique  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   Min Max classique   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -87,7 +89,6 @@ evaluate_and_choose([Move|Moves], InitPlayer, Depth, MaxMin, Record, Best) :-
 	move(Move, MaxMin, InitPlayer),
 	minimax(Depth, InitPlayer, MaxMin, MoveX, Value),
 	update(Move, Value, Record, Record1, MaxMin),
-	%ponderate(Record1, MaxMin, Record2),
 	undo_move(Move, Color),
 	evaluate_and_choose(Moves, InitPlayer, Depth, MaxMin, Record1, Best).
 
@@ -100,9 +101,6 @@ minimax(0, InitPlayer, MaxMin, Move, Value) :-
 minimax(Depth, InitPlayer, MaxMin, Move, Value) :-
 	Depth > 0,
 	findall(X, (between(1,7,X),coupValide(X)), Moves),
-	%findPossibleMoves(1, 8, Moves),
-	%NextDepth:=Depth-1,
-	%MinMax := -MaxMin,
 	NewDepth is Depth-1,
 	NewMaxMin is -MaxMin,
 	evaluate_and_choose(Moves, InitPlayer, NewDepth, NewMaxMin, (nil, 1000*MaxMin), (Move, Value)).
@@ -158,16 +156,5 @@ undo_move(Move, Color) :-
 	retract(caseTest(Move, LinePos, Color)).
 
 value(InitPlayer, V) :-
-	% couleurJoueurCourant(InitPlayer, Courant),
 	evalJeu(InitPlayer,Score),
 	V is Score.
-
-% couleurJoueurCourant(InitPlayer, Couleur) :-
-% 	initDepth(DepthInit),
-% 	mod(DepthInit,2) =:= 0, 
-% 	Couleur = InitPlayer.
-
-% couleurJoueurCourant(InitPlayer, Couleur) :-
-% 	initDepth(DepthInit),
-% 	mod(DepthInit,2) =:= 1, 
-% 	ennemi(InitPlayer, Couleur).

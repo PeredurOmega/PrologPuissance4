@@ -1,4 +1,8 @@
-%%%%%%%%%%%% eval.pl %%%%%%%%%%%%
+%%%%%%%%%%%% evalOld.pl %%%%%%%%%%%%
+
+%%% Ancien code basé sur la source : https://github.com/SIGSWAG/PrologPuissance4 %%%
+%%% Code non utilisé dans notre solution sauf pour jouer contre afin de tester nos IA %%%
+
 % Différentes fonctions d'évaluation pour le Puissance 4, toutes basées sur des heuristiques différentes.
 
 :- module(evalOld, [evalJeuOld/5, caseVideTestOld/2]).

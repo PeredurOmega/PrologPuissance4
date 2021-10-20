@@ -1,4 +1,8 @@
 ﻿%%%%%%%%%%%% webserver.pl %%%%%%%%%%%%
+
+%%% Ancien code basé sur la source : https://github.com/SIGSWAG/PrologPuissance4 %%%
+%%% Modification légère pour intégrer l'appel des nouvelles IA %%%
+
 % Serveur web permettant d'interfacer Prolog avec notre IHM web.
 
 %%%%%%%%%%%%%%%%
@@ -168,11 +172,11 @@ obtenirCoup(_,2,Coup) :-
 
 %iaAlphabeta(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsAlignement,PoidsBlocage)
 obtenirCoup(CouleurJCourant,3,Coup) :-
-    iaAlphabeta(CouleurJCourant,Coup,4,1,1,3).
+    iaAlphabeta(CouleurJCourant,Coup,4,1,0,0,1,4).
 obtenirCoup(CouleurJCourant,4,Coup) :-
-    iaAlphabeta(CouleurJCourant,Coup,5,1,1,3).
+    iaAlphabeta(CouleurJCourant,Coup,5,1,0,0,1,4).
 obtenirCoup(CouleurJCourant,5,Coup) :-
-    iaAlphabeta(CouleurJCourant,Coup,6,1,1,3).
+    iaAlphabeta(CouleurJCourant,Coup,6,1,0,0,1,4).
 %iaMinimaxOld(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsPuissance3,PoidsDensite,PoidsAdjacence) 
 obtenirCoup(CouleurJCourant,6,Coup) :-
     iaMinimaxOld(CouleurJCourant,Coup,4,1,1,0,0).

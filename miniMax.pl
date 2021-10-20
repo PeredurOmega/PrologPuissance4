@@ -1,4 +1,8 @@
 ﻿%%%%%%%%%%%% miniMax.pl %%%%%%%%%%%%
+
+%%% Ancien code basé sur la source : https://github.com/SIGSWAG/PrologPuissance4 %%%
+%%% Code non utilisé dans notre solution sauf pour jouer contre afin de tester nos IA %%%
+
 % Implémentation de minimax avec diverses optimisations propres au Puissance 4.
 
 :- module(miniMax, [parcoursArbre/4, caseTestOld/3, gagneTest/4]).
@@ -529,7 +533,3 @@ gagneTestDirectColonne(X,Y,J) :-
     caseTestOld(X,Y2,J),
     decr(Y2,Y3),
     caseTestOld(X,Y3,J).
-
-%%%%%%% caseVideTestOld %%%%%
-
-caseVideTestOld(X,Y) :- nonvar(X),nonvar(Y),not(caseTestOld(X,Y,_)).
