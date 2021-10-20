@@ -1,3 +1,10 @@
+% - Emmanuel GARREAU
+% - Mathis GOICHON
+% - Yanis MANSOUR
+% - Bérenger MAYOUD--DUPIN
+% - Paul SOUTEYRAT
+% - Timothé VERSTRAETE
+
 %%%%%%%%%%%% minimaxdraw.pl %%%%%%%%%%%%
 
 %%% Code implémentant les algorithmes minimax et élagage alpha beta 

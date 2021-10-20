@@ -1,4 +1,11 @@
-﻿%%%%%%%%%%%%%%
+﻿% - Emmanuel GARREAU
+% - Mathis GOICHON
+% - Yanis MANSOUR
+% - Bérenger MAYOUD--DUPIN
+% - Paul SOUTEYRAT
+% - Timothé VERSTRAETE
+
+%%%%%%%%%%%%%%
 %% DÉPRÉCIÉ %%
 %%%%%%%%%%%%%%
 

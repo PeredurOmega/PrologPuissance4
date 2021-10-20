@@ -1,4 +1,11 @@
-﻿%%%%%%%%%%%% jeu.pl %%%%%%%%%%%%
+﻿% - Emmanuel GARREAU
+% - Mathis GOICHON
+% - Yanis MANSOUR
+% - Bérenger MAYOUD--DUPIN
+% - Paul SOUTEYRAT
+% - Timothé VERSTRAETE
+
+%%%%%%%%%%%% jeu.pl %%%%%%%%%%%%
 
 %%% Ancien code basé sur la source : https://github.com/SIGSWAG/PrologPuissance4 %%%
 

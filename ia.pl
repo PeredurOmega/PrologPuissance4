@@ -1,4 +1,11 @@
-﻿%%%%%%%%%%%% ia.pl %%%%%%%%%%%%
+﻿% - Emmanuel GARREAU
+% - Mathis GOICHON
+% - Yanis MANSOUR
+% - Bérenger MAYOUD--DUPIN
+% - Paul SOUTEYRAT
+% - Timothé VERSTRAETE
+
+%%%%%%%%%%%% ia.pl %%%%%%%%%%%%
 
 %%% Code permettant d'appeler les différentes IA %%% 
 

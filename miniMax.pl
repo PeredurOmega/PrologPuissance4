@@ -1,4 +1,11 @@
-﻿%%%%%%%%%%%% miniMax.pl %%%%%%%%%%%%
+﻿% - Emmanuel GARREAU
+% - Mathis GOICHON
+% - Yanis MANSOUR
+% - Bérenger MAYOUD--DUPIN
+% - Paul SOUTEYRAT
+% - Timothé VERSTRAETE
+
+%%%%%%%%%%%% miniMax.pl %%%%%%%%%%%%
 
 %%% Ancien code basé sur la source : https://github.com/SIGSWAG/PrologPuissance4 %%%
 %%% Code non utilisé dans notre solution sauf pour jouer contre afin de tester nos IA %%%

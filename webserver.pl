@@ -1,4 +1,11 @@
-﻿%%%%%%%%%%%% webserver.pl %%%%%%%%%%%%
+﻿% - Emmanuel GARREAU
+% - Mathis GOICHON
+% - Yanis MANSOUR
+% - Bérenger MAYOUD--DUPIN
+% - Paul SOUTEYRAT
+% - Timothé VERSTRAETE
+
+%%%%%%%%%%%% webserver.pl %%%%%%%%%%%%
 
 %%% Ancien code basé sur la source : https://github.com/SIGSWAG/PrologPuissance4 %%%
 %%% Modification légère pour intégrer l'appel des nouvelles IA %%%

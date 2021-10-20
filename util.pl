@@ -1,4 +1,11 @@
-﻿%%%%%%%%%%%% util.pl %%%%%%%%%%%%
+﻿% - Emmanuel GARREAU
+% - Mathis GOICHON
+% - Yanis MANSOUR
+% - Bérenger MAYOUD--DUPIN
+% - Paul SOUTEYRAT
+% - Timothé VERSTRAETE
+
+%%%%%%%%%%%% util.pl %%%%%%%%%%%%
 % Ancien code basé sur la source : https://github.com/SIGSWAG/PrologPuissance4 %
 % Différents prédicats d'utilité publique.
 

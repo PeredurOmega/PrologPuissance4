@@ -1,4 +1,11 @@
-﻿%%%%%%%%%%%% eval.pl %%%%%%%%%%%%
+﻿% - Emmanuel GARREAU
+% - Mathis GOICHON
+% - Yanis MANSOUR
+% - Bérenger MAYOUD--DUPIN
+% - Paul SOUTEYRAT
+% - Timothé VERSTRAETE
+
+%%%%%%%%%%%% eval.pl %%%%%%%%%%%%
 % Fonctions d'évaluation pour le Puissance 4
 % Heuristique sur le positionnement des pions dans le plateau
 % Heuristique sur l'alignement des pions, sans vérifier que le gain est encore possible
