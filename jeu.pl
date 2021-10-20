@@ -1,4 +1,13 @@
-﻿%%%%%%%%%%%% jeu.pl %%%%%%%%%%%%
+﻿% - Emmanuel GARREAU
+% - Mathis GOICHON
+% - Yanis MANSOUR
+% - Bérenger MAYOUD--DUPIN
+% - Paul SOUTEYRAT
+% - Timothé VERSTRAETE
+
+%%%%%%%%%%%% jeu.pl %%%%%%%%%%%%
+
+%%% Ancien code basé sur la source : https://github.com/SIGSWAG/PrologPuissance4 %%%
 
 :- module(jeu, [
 	initJeu/0,
@@ -10,7 +19,6 @@
 	typeJoueur/2,
 	changerJoueur/0,
 	insererJeton/3,
-	% findPossibleMoves/3,
 	findPossibleMoves2/1,
 	calculPositionJeton/3
 ]).
@@ -36,12 +44,12 @@
 % Définition des différentes IA.
 typeJoueur(1,'Humain').
 typeJoueur(2,'IA Aléatoire').
-typeJoueur(3,'IA Minimax 3 - eval Position').
-typeJoueur(4,'IA Minimax 3 - eval Position+Puissance3').
-typeJoueur(5,'IA Minimax 4 - eval Position').
-typeJoueur(6,'IA Minimax 4 - eval Position+Puissance3').
-typeJoueur(7,'IA Minimax 5 - eval Position').
-typeJoueur(8,'IA Minimax 5 - eval Position+Puissance3').
+typeJoueur(3,'IA Minimax 4 - eval Perso').
+typeJoueur(4,'IA Minimax 5 - eval Perso').
+typeJoueur(5,'IA Minimax 6 - eval Perso').
+typeJoueur(6,'IA Minimax old 4 - eval Old').
+typeJoueur(7,'IA Minimax old 5 - eval Old').
+typeJoueur(8,'IA Minimax old 6 - eval Old').
 
 changerJoueur :-
 	joueurCourant(rouge,TypeJoueurR),
@@ -248,19 +256,6 @@ calculPositionJeton(X,YCheck,Y) :-
 	incr(YCheck, YCheck1),
 	calculPositionJeton(X,YCheck1,Y).
 
-% findPossibleMoves/3(-colonneMax, -colonneCheck, +listePossibleMoves)
-% findPossibleMoves(XCheck,XCheck,Moves).
-
-% findPossibleMoves(XCheck,X,Moves) :-
-% 	incr(XCheck, XCheck1),
-% 	coupValide(XCheck),
-% 	append([XCheck],Moves,MovesA),
-% 	findPossibleMoves(XCheck1,X,MovesA).
-
-% findPossibleMoves(XCheck,X,MovesA) :-
-% 	incr(XCheck, XCheck1),
-% 	findPossibleMoves(XCheck1,X,MovesA).
-
 inRange(A,A,[A]).
 
 inRange(A,B,[A|T]) :-
@@ -273,7 +268,7 @@ coupsValides([],[]).
 coupsValides([H|T1],[H|T]) :-
 	coupValide(H),coupsValides(T1, T).
 
-coupsValides([H1|T1],[H|T]) :-
+coupsValides([H1|T1],[_|T]) :-
 	not(coupValide(H1)),coupsValides(T1, T).
 
 

@@ -1,6 +1,15 @@
-﻿%%%%%%%%%%%%%%
+﻿% - Emmanuel GARREAU
+% - Mathis GOICHON
+% - Yanis MANSOUR
+% - Bérenger MAYOUD--DUPIN
+% - Paul SOUTEYRAT
+% - Timothé VERSTRAETE
+
+%%%%%%%%%%%%%%
 %% DÉPRÉCIÉ %%
 %%%%%%%%%%%%%%
+
+%%% Ancien code basé sur la source : https://github.com/SIGSWAG/PrologPuissance4 %%%
 
 %%%%%%%%%%%% ihm.pl %%%%%%%%%%%%
 

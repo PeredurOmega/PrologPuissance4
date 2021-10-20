@@ -1,4 +1,15 @@
-﻿%%%%%%%%%%%% webserver.pl %%%%%%%%%%%%
+﻿% - Emmanuel GARREAU
+% - Mathis GOICHON
+% - Yanis MANSOUR
+% - Bérenger MAYOUD--DUPIN
+% - Paul SOUTEYRAT
+% - Timothé VERSTRAETE
+
+%%%%%%%%%%%% webserver.pl %%%%%%%%%%%%
+
+%%% Ancien code basé sur la source : https://github.com/SIGSWAG/PrologPuissance4 %%%
+%%% Modification légère pour intégrer l'appel des nouvelles IA %%%
+
 % Serveur web permettant d'interfacer Prolog avec notre IHM web.
 
 %%%%%%%%%%%%%%%%
@@ -166,18 +177,19 @@ statutJeu(_,_,_, 'continue') :-
 obtenirCoup(_,2,Coup) :-
     iaAleatoire(Coup).
 
+%iaAlphabeta(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsAlignement,PoidsBlocage)
 obtenirCoup(CouleurJCourant,3,Coup) :-
-    % iaMinimax(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsPuissance3,PoidsDensite,PoidsAdjacence)
-    iaMinimax(CouleurJCourant,Coup,3,1,0,0,0).
+    iaAlphabeta(CouleurJCourant,Coup,4,1,0,0,1,4).
 obtenirCoup(CouleurJCourant,4,Coup) :-
-    iaMinimax(CouleurJCourant,Coup,3,1,0,0,0).
+    iaAlphabeta(CouleurJCourant,Coup,5,1,0,0,1,4).
 obtenirCoup(CouleurJCourant,5,Coup) :-
-    iaMinimax(CouleurJCourant,Coup,4,1,0,0,0).
+    iaAlphabeta(CouleurJCourant,Coup,6,1,0,0,1,4).
+%iaMinimaxOld(JoueurCourant,Coup,Profondeur,PoidsPosition,PoidsPuissance3,PoidsDensite,PoidsAdjacence) 
 obtenirCoup(CouleurJCourant,6,Coup) :-
-    iaMinimax(CouleurJCourant,Coup,4,1,1,0,0).
+    iaMinimaxOld(CouleurJCourant,Coup,4,1,1,0,0).
 obtenirCoup(CouleurJCourant,7,Coup) :-
-    iaMinimax(CouleurJCourant,Coup,5,1,1,0,0).
+    iaMinimaxOld(CouleurJCourant,Coup,5,1,1,0,0).
 obtenirCoup(CouleurJCourant,8,Coup) :-
-    iaMinimax(CouleurJCourant,Coup,5,1,1,0,0).
+    iaMinimaxOld(CouleurJCourant,Coup,6,1,1,0,0).
 
 

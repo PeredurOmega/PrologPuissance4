@@ -1,7 +1,17 @@
-﻿%%%%%%%%%%%% eval.pl %%%%%%%%%%%%
-% Différentes fonctions d'évaluation pour le Puissance 4, toutes basées sur des heuristiques différentes.
+﻿% - Emmanuel GARREAU
+% - Mathis GOICHON
+% - Yanis MANSOUR
+% - Bérenger MAYOUD--DUPIN
+% - Paul SOUTEYRAT
+% - Timothé VERSTRAETE
 
-:- module(eval, [evalTest1/2, evalPosition/3, caseVideTest/2]).
+%%%%%%%%%%%% eval.pl %%%%%%%%%%%%
+% Fonctions d'évaluation pour le Puissance 4
+% Heuristique sur le positionnement des pions dans le plateau
+% Heuristique sur l'alignement des pions, sans vérifier que le gain est encore possible
+% 				exemple : J R R R J comptabilisé alors qu'il n'apporte rien
+
+:- module(eval, [caseVideTest/2, evalJeu/2]).
 
 %%%%%%%%%%%%%%%%
 %% Inclusions %%
@@ -11,179 +21,199 @@
 :- use_module(jeu).
 :- use_module(ia).
 :- use_module(minimaxdraw).
+:- use_module(evalNew).
 
 :- use_module(library(random)).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%
-%% Prédicats publics %%
-%%%%%%%%%%%%%%%%%%%%%%%
+caseVideTest(X,Y) :- nonvar(X),nonvar(Y),not(caseTest(X,Y,_)).
 
-% evalJeu/5(+JoueurCourant, +AutreJoueur, +X, +Y, -Score)
-% Évalue la situation courante pour le joueur JoueurCourant étant donné que le dernier coup joué fut joué en (X,Y). Le score est pondéré par les différentes pondérations données en entrée (par assert) à evalJeu. Le score est ensuite perturbé par une valeur aléatoire, permettant de casser le caractère déterministe de l'IA.
-% Score s'unifie avec le score évalué pour la position courante.
-% evalJeu(JoueurCourant,AutreJoueur,X,Y,Score) :-
-% 	assert(caseTest(X,Y,JoueurCourant)),
-% 	assert(ennemiTest(AutreJoueur)),
-% 	poidsPuissance3(PoidsPuissance3), poidsPosition(PoidsPosition), poidsDensite(PoidsDensite), poidsAdjacence(PoidsAdjacence),
-% 	evalPosition(JoueurCourant,Score1,PoidsPosition),
-% 	evalPuissances3(JoueurCourant,AutreJoueur,Score2,PoidsPuissance3),
-% 	densite(JoueurCourant,Score3,PoidsDensite),
-% 	evalAdjacence(X,Y,_,Score4, PoidsAdjacence),
-% 	retract(caseTest(X,Y,JoueurCourant)),
-% 	retract(ennemiTest(AutreJoueur)),
-% 	random_between(-2,2,Perturbation),
-% 	Score is Score1 * PoidsPosition
-% 			+ Score2 * PoidsPuissance3
-% 			+ Score3
-% 			+ Score4
-% 			+ Perturbation.
 
-%%%%%%%%%%%%%%%%%%%%%%
-%% Prédicats privés %%
-%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%% Attribution de poids en fonction de la position %%%%%%%%%%%
+caseTableauAlignements(1,1,3).
+caseTableauAlignements(2,1,4).
+caseTableauAlignements(3,1,5).
+caseTableauAlignements(4,1,7).
+caseTableauAlignements(5,1,5).
+caseTableauAlignements(6,1,4).
+caseTableauAlignements(7,1,3).
 
-% evalPosition/3(+Courant,-Score,+PoidsPosition)
-% Évalue en privilégiant les positions centrales en fonction de la pondération.
-% Score s'unifie à une valeur entre -400 et 400.
+caseTableauAlignements(1,2,4).
+caseTableauAlignements(2,2,6).
+caseTableauAlignements(3,2,8).
+caseTableauAlignements(4,2,10).
+caseTableauAlignements(5,2,8).
+caseTableauAlignements(6,2,6).
+caseTableauAlignements(7,2,4).
+
+caseTableauAlignements(1,3,5).
+caseTableauAlignements(2,3,8).
+caseTableauAlignements(3,3,11).
+caseTableauAlignements(4,3,13).
+caseTableauAlignements(5,3,11).
+caseTableauAlignements(6,3,8).
+caseTableauAlignements(7,3,5).
+
+caseTableauAlignements(1,4,5).
+caseTableauAlignements(2,4,8).
+caseTableauAlignements(3,4,11).
+caseTableauAlignements(4,4,13).
+caseTableauAlignements(5,4,11).
+caseTableauAlignements(6,4,8).
+caseTableauAlignements(7,4,5).
+
+caseTableauAlignements(1,5,4).
+caseTableauAlignements(2,4,6).
+caseTableauAlignements(3,5,8).
+caseTableauAlignements(4,5,10).
+caseTableauAlignements(5,5,8).
+caseTableauAlignements(6,5,6).
+caseTableauAlignements(7,5,4).
+
+caseTableauAlignements(1,6,3).
+caseTableauAlignements(2,6,4).
+caseTableauAlignements(3,6,5).
+caseTableauAlignements(4,6,7).
+caseTableauAlignements(5,6,5).
+caseTableauAlignements(6,6,4).
+caseTableauAlignements(7,6,3).
+
+
+% Prédicat qui permet d'évaluer l'état à l'instant t du plateau
+% Courant est la couleur du joueur courant
+% evalJeu(+Courant, -ScoreFinal)
+evalJeu(Courant,ScoreFinal) :-
+	poidsPosition(PoidsPosition),
+	poidsAlignement(PoidsAlignement),
+	poidsBlocage(PoidsBlocage),
+	poidsAlignementNew(PoidsAlignementNew),
+	poidsBlocageNew(PoidsBlocageNew),
+	evalPosition(Courant,ScorePosition,PoidsPosition),
+	evalNbAlignements(Courant,ScoreAlignement,PoidsAlignement),
+	evalBlocage(Courant,ScoreBlocage,PoidsBlocage),
+	evalAlignements3New(Courant,ScoreAlignementNew,PoidsAlignementNew),
+	evalBlocage3New(Courant,ScoreBlocageNew,PoidsBlocageNew),
+	Score is ScorePosition * PoidsPosition 
+		+ ScoreAlignement * PoidsAlignement
+		+ ScoreBlocage * PoidsBlocage
+		+ ScoreAlignementNew * PoidsAlignementNew
+		+ ScoreBlocageNew * PoidsBlocageNew,
+	random(1,10,Percentage),
+	random(-1,1,Advantage),
+	perturbation(Score,Percentage,Advantage,ScoreFinal).
+
+% Prédicat qui ajoute une perturbation au score final d'un coup
+% pertubation(+Score, +Percentage, +Advantage, -ScoreFinal)
+perturbation(Score,Percentage,Advantage,ScoreFinal) :-
+	Advantage > 0,
+	ScoreFinal is Score *(1 + Percentage/100). 
+
+perturbation(Score,Percentage,Advantage,ScoreFinal) :-
+	Advantage =< 0,
+	ScoreFinal is Score *(1 - Percentage/100).
+
+% Evalue le placement de l'ensemble des pions du plateau 
+% evalPosition(+Courant,-Score,+PoidsPosition) 
 evalPosition(Courant,Score,PoidsPosition) :-
 	PoidsPosition>0,
-	assert(nbCasesPleines(0)),
-	findall(S, evalCases(Courant,S), Scores),
+	findall(S, evalCasesPosition(Courant,S), Scores),
 	sum(Scores, ScoreTot),
-	nbCasesPleines(NbCasesPleinesFinal),
-	retract(nbCasesPleines(NbCasesPleinesFinal)),
-	Score is ScoreTot / (NbCasesPleinesFinal+1).
+	Score is ScoreTot.
 evalPosition(_,0,_).
 
-evalCases(Courant,ScoreCase) :-
-	caseTest(X,Y,_),
-	nbCasesPleines(NbCasesPleines),
-	retract(nbCasesPleines(NbCasesPleines)),
-	incr(NbCasesPleines,NbCasesPleinesF),
-	assert(nbCasesPleines(NbCasesPleinesF)),
-	evalCase(X,Y,Courant,ScoreCase).
+% Evalue la position d'un pion dans le plateau
+% evalCasesPosition(+Courant,-ScoreCase) 
+evalCasesPosition(Courant,ScoreCase) :-
+	caseTest(X,Y,Couleur),
+	evalCaseNew(X,Y,Courant,Couleur,ScoreCase).
 
-% renvoie un score entre -400 et 400
-evalCase(X,Y,Courant,ScoreCase) :-
-	nbColonnes(NBCOLONNES),
-	nbLignes(NBLIGNES),
-	% ponderationJ(X, Y, Courant, PonderationJoueur),
-	CentreX is NBCOLONNES // 2 + 1,
-	CentreY is NBLIGNES // 2 + 1,
-	Dx is X - CentreX,
-	Dy is Y - CentreY,
-	abs(Dx,AbsX),
-	abs(Dy,AbsY),
-	ScoreCase is ( 200/(AbsX+1) + 200/(AbsY+1) ).
+% Attribue un poids à un jeton en fonction de sa couleur
+% et de son placement dans le plateau
+% evalCaseNew(+X,+Y,+Courant,+Couleur,-ScoreCase)
+evalCaseNew(X,Y,Courant,Couleur,ScoreCase) :-
+	Couleur == Courant,
+	caseTableauAlignements(X,Y,Poids),
+	ScoreCase is Poids.
 
-ponderationJ(X,Y, Courant,1) :-
-	caseTest(X,Y,Courant), !.
-ponderationJ(X,Y,_,-1) :-
-	ennemiTest(J),
-	caseTest(X,Y,J), !.
-ponderationJ(_,_,_,0).
+evalCaseNew(X,Y,Courant,Couleur,ScoreCase) :-
+	Couleur \== Courant,
+	caseTableauAlignements(X,Y,Poids),
+	ScoreCase is Poids * -1.
 
-%%%%%%%%%%%%%%%%%%%%
+% Evalue l'ensemble des alignements des pions de couleur Courant
+% evalNbAlignements(+Courant,-Score,+PoidsAlignement)
+evalNbAlignements(Courant,Score,PoidsAlignement) :-
+	PoidsAlignement>0,
+	findall(S, evalCasesAlignements(Courant,S), Scores),
+	sum(Scores, ScoreTot),
+	Score is ScoreTot.
+evalNbAlignements(_,0,_).
 
-% evalPuissances3/3(+JoueurCourant,+AutreJoueur,-Score)
-% Évalue en cherchant les positions faisant gagner.
-% ScoreFinal s'unifie au score de la position.
-evalPuissances3(JoueurCourant,AutreJoueur,ScoreFinal,PoidsPuissance3) :-
-	PoidsPuissance3>0,
-	findall(S,evalCasesVides(JoueurCourant,S),ScoresCourant), sum(ScoresCourant,ScoreCourant),
-	findall(S,evalCasesVides(AutreJoueur,S),ScoresAutre), sum(ScoresAutre,ScoreAutre),
-	ScoreFinal is ScoreCourant - ScoreAutre.
-evalPuissances3(_,_,0,_).
+% evalCasesAlignements(+Courant,-ScoreCase)
+evalCasesAlignements(Courant,ScoreCase) :-
+	caseTest(X,Y,Courant),
+	calculPoidsAlignements(X,Y,Courant,ScoreCase).
 
-evalCasesVides(Joueur,ScoreCase) :-
-	nbColonnes(NBCOLONNES), nbLignes(NBLIGNES),
-	between(1,NBCOLONNES,X), between(1,NBLIGNES,Y),
-	caseTest(X,Y,Joueur),
-	incr(X,X1),
-	decr(X,X2),
-	incr(Y,Y1),
-	decr(Y,Y2),
-	caseVideTest(X1,Y1),
-	caseVideTest(X2,Y1),
-	caseTest(X2,Y2,_),
-	caseTest(X1,Y2,_),
-	(gagneTestDirect(X1,Y1,Joueur) -> ScoreCase1=100 ; ScoreCase1=0),
-	(gagneTestDirect(X2,Y1,Joueur) -> ScoreCase2=100 ; ScoreCase2=0),
-	ScoreCase is ScoreCase1+ScoreCase2.
+% Evalue l'ensemble des alignements des pions de couleur opposé à Courant
+% evalNbAlignements(+Courant,-Score,+PoidsAlignement)
+evalBlocage(Courant,Score,PoidsBlocage) :-
+	PoidsBlocage>0,
+	findall(S, evalCasesBlocage(Courant,S), Scores),
+	sum(Scores, ScoreTot),
+	Score is ScoreTot.
+evalBlocage(_,0,_).
 
+% evalCasesBlocage(+Courant,-ScoreCase)
+evalCasesBlocage(Courant,ScoreCase) :-
+	ennemi(Courant,AutreJoueur),
+	caseTest(X,Y,AutreJoueur),
+	calculPoidsAlignements(X,Y,AutreJoueur,Score),
+	ScoreCase is Score * -1.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%			HEURISTIQUE PAR ADJACENCE
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Evalue l'alignement d'un pion dans le plateau
+% calculPoidsAlignements(+X,+Y,+J,-Score)
+calculPoidsAlignements(X,Y,J,Score) :-
+	gagneTestDirectLigne(X,Y,J,RfLignes),
+	gagneTestDirectDiag1(X,Y,J,RfDiag1),
+	gagneTestDirectDiag2(X,Y,J,RfDiag2),
+	gagneTestDirectColonne(X,Y,J,RfColonnes),
+	scoreAlignement(RfLignes,ScoreLignes),
+	scoreAlignement(RfDiag1,ScoreDiag1),
+	scoreAlignement(RfDiag2,ScoreDiag2),
+	scoreAlignement(RfColonnes,ScoreColonnes),
+	Score is ScoreLignes + ScoreColonnes + ScoreDiag1 + ScoreDiag2.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% evalAdjacence/5(+X,+Y,+Joueur,-Note,+PoidsAdjacence)
-% Donne une note d'autant plus forte qu'un pion est entouré de pions amis.
-% Note s'unifie au score de la position.
-
-evalAdjacence(X,Y,Joueur,Note,PoidsAdjacence) :-
-	PoidsAdjacence>0,
-	aggregate_all(count,caseAdjacente(X,Y,Joueur,_,_),N),
-	pow(N,2,Note).
-evalAdjacence(_,_,_,0,_).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%			HEURISTIQUE PAR DENSITE DE PION
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% densite/3(+Joueur,-Note,+PoidsDensite)
-% Donne une note d'autant plus élevée que les pions sont groupés.
-% Note s'unifie au score de la position.
-densite(J,Note,PoidsDensite) :- PoidsDensite>0, Z is 1, calculNbPoints(J,Z,Note).
-densite(_,0,_).
-calculNbPoints(_,Z,Note) :- Z>6, Note is 0.
-calculNbPoints(J,Z,Note) :- nbPointsZone(J,Z,N), incr(Z,ZP), calculNbPoints(J,ZP,NP), Note is N+NP.
-nbPointsZone(J,Z,NbPoints) :- nbPionsZone(J,Z,N), pow(N,2,NbPoints).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% nbPionsZone/3(+Joueur,+Zone,-NbPions)
-% Donne le nombre de pions contenu dans une zone.
-% NbPions s'unifie au nombre de pions contenu dans une zone.
-nbPionsZone(J,Z,NbPions) :-
-	aggregate_all(count,caseTestZone(Z,J,_,_),NbPions).
-
-caseTestZone(Zone,Joueur,X,Y) :- caseTest(X,Y,Joueur), zone(Zone,X,Y).
-zone(1,X,Y) :- X =<3, Y =< 3.
-zone(2,X,Y) :- X = 4, Y =< 3.
-zone(3,X,Y) :- X > 4, Y =< 3.
-zone(4,X,Y) :- X > 4, Y > 3.
-zone(5,X,Y) :- X = 4, Y > 3.
-zone(6,X,Y) :- X =<3, Y > 3.
+% Calcule un score en fonction du nombre de pions alignés
+% scoreAlignement(+NbAlignes,-Score)
+scoreAlignement(NbAlignes,Score) :-
+	NbAlignes == 1,
+	Score is 0.
+scoreAlignement(NbAlignes,Score) :-
+	NbAlignes == 2,
+	Score is 10.
+scoreAlignement(NbAlignes,Score) :-
+	NbAlignes == 3,
+	Score is 100.
+scoreAlignement(NbAlignes,Score) :-
+	NbAlignes == 4,
+	Score is 1000.
 
 
-
-%%%%% gagneTestDirect %%%%%
-
-
-gagneTestDirect(X,Y,J) :-
-	gagneTestDirectLigne(X,Y,J).
-gagneTestDirect(X,Y,J) :-
-	gagneTestDirectDiag1(X,Y,J).
-gagneTestDirect(X,Y,J) :-
-	gagneTestDirectDiag2(X,Y,J).
-
+%%%%% Prédicats suivants calcule les alignements d'un pion donné
 
 %%% En ligne %%%
-
-gagneTestDirectLigne(X,Y,J) :-
+gagneTestDirectLigne(X,Y,J, Rf) :-
 	decr(X,X1),
 	gaucheVerif(X1,Y,J,Rg),
-	incr(X,_),
-	droiteVerif(X,_,J,Rd),
+	incr(X,X2),
+	droiteVerif(X2,Y,J,Rd),
 	!,
-	Rf is Rg+Rd, Rf>2.
+	Rf is Rg+Rd+1.
 
 gaucheVerif(X,Y,J,Rg):-
 	gauche(X,Y,J,0,Rg).
 gauche(X,Y,J,R,R) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la case non J
+	not(caseTest(X,Y,J)). 
 gauche(X,Y,J,R,Rg) :-
 	decr(X,X1),
 	incr(R,R1),
@@ -192,15 +222,42 @@ gauche(X,Y,J,R,Rg) :-
 droiteVerif(X,Y,J,Rg):-
 	droite(X,Y,J,0,Rg).
 droite(X,Y,J,R,R) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la case non J
+	not(caseTest(X,Y,J)). 
 droite(X,Y,J,R,Rg) :-
 	incr(X,X1),
 	incr(R,R1),
 	droite(X1,Y,J,R1,Rg).
 
-%%% En diagonale \ %%%
+%%% En Colonne %%%
+gagneTestDirectColonne(X,Y,J,Rf) :-
+	decr(Y,Y1),
+	basVerif(X,Y1,J,Rb),
+	incr(Y,Y2),
+	hautVerif(X,Y2,J,Rh),
+	!,
+	Rf is Rh+Rb+1.
 
-gagneTestDirectDiag1(X,Y,J) :-
+basVerif(X,Y,J,Rb):-
+	bas(X,Y,J,0,Rb).
+bas(X,Y,J,R,R) :-
+	not(caseTest(X,Y,J)). 
+bas(X,Y,J,R,Rb) :-
+	decr(Y,Y1),
+	incr(R,R1),
+	bas(X,Y1,J,R1,Rb).
+
+hautVerif(X,Y,J,Rh):-
+	haut(X,Y,J,0,Rh).
+haut(X,Y,J,R,R) :-
+	not(caseTest(X,Y,J)). 
+haut(_,Y,J,R,Rh) :-
+	incr(Y,Y1),
+	incr(R,R1),
+	haut(x,Y1,J,R1,Rh).
+
+
+%%% En diagonale paire %%%
+gagneTestDirectDiag1(X,Y,J,Rf) :-
 	decr(X,X1),
 	incr(Y,Y1),
 	gaucheHautVerif(X1,Y1,J,Rg),
@@ -208,13 +265,12 @@ gagneTestDirectDiag1(X,Y,J) :-
 	decr(Y,Y2),
 	droiteBasVerif(X2,Y2,J,Rd),
 	!,
-	Rf is Rg+Rd,
-	Rf>2.
+	Rf is Rg+Rd+1.
 
 gaucheHautVerif(X,Y,J,Rg):-
 	gaucheHaut(X,Y,J,0,Rg).
 gaucheHaut(X,Y,J,R,R) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la case non J
+	not(caseTest(X,Y,J)). 
 gaucheHaut(X,Y,J,R,Rg) :-
 	incr(Y,Y1),
 	decr(X,X1),
@@ -224,16 +280,16 @@ gaucheHaut(X,Y,J,R,Rg) :-
 droiteBasVerif(X,Y,J,Rg):-
 	droiteBas(X,Y,J,0,Rg).
 droiteBas(X,Y,J,R,R) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la case non J
+	not(caseTest(X,Y,J)). 
 droiteBas(X,Y,J,R,Rg) :-
 	decr(Y,Y1),
 	incr(X,X1),
 	incr(R,R1),
 	droiteBas(X1,Y1,J,R1,Rg).
 
-%%% En diagonale / %%%
 
-gagneTestDirectDiag2(X,Y,J) :-
+%%% En diagonale impaire %%%
+gagneTestDirectDiag2(X,Y,J,Rf) :-
 	decr(X,X1),
 	decr(Y,Y1),
 	gaucheBasVerif(X1,Y1,J,Rg),
@@ -241,13 +297,12 @@ gagneTestDirectDiag2(X,Y,J) :-
 	incr(Y,Y2),
 	droiteHautVerif(X2,Y2,J,Rd),
 	!,
-	Rf is Rg+Rd,
-	Rf>2.
+	Rf is Rg+Rd+1.
 
 gaucheBasVerif(X,Y,J,Rg) :-
 	gaucheBas(X,Y,J,0,Rg).
 gaucheBas(X,Y,J,R,R) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la case non J
+	not(caseTest(X,Y,J)).
 gaucheBas(X,Y,J,R,Rg) :-
 	decr(Y,Y1),
 	decr(X,X1),
@@ -257,25 +312,9 @@ gaucheBas(X,Y,J,R,Rg) :-
 droiteHautVerif(X,Y,J,Rg) :-
 	droiteHaut(X,Y,J,0,Rg).
 droiteHaut(X,Y,J,R,R) :-
-	not(caseTest(X,Y,J)). %Jusqu'à la case non J
+	not(caseTest(X,Y,J)). 
 droiteHaut(X,Y,J,R,Rg) :-
 	incr(Y,Y1),
 	incr(X,X1),
 	incr(R,R1),
 	droiteHaut(X1,Y1,J,R1,Rg).
-
-%%%%%%% caseVideTest %%%%%
-% caseVideTest(+X,+Y)
-% vrai si la case X,Y est vide
-caseVideTest(X,Y) :- nonvar(X),nonvar(Y),not(caseTest(X,Y,_)).
-
-
-%%%% Utilisé pour les tests unitaires
-
-evalTest1(1,-3).
-evalTest1(2,-4).
-evalTest1(3,5).
-evalTest1(4,10).
-evalTest1(5,9).
-evalTest1(6,-5).
-evalTest1(7,8).
